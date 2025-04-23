@@ -1,0 +1,44 @@
+.intro-container {
+    background-color: black;
+    height: 100vh;
+    width: 100vw;
+}
+
+.terminal {
+    background-color: #041704;
+    border: 3px solid #39ff14;
+    box-sizing: border-box;
+    padding: 30px;
+    min-width: 300px;
+    max-width: 90%;
+    min-height: 60%;
+    width: 100%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.terminal-text {
+    margin: 0px;
+    color: #39ff14;
+    font-family: "Share Tech", sans-serif;
+    font-size: clamp(16px, 4vw, 24px);
+    white-space: nowrap;
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1em;
+    background-color: #39ff14;
+    margin-left: 4px;
+    animation: blink 1s step-start infinite;
+    position: absolute;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
