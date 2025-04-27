@@ -26,7 +26,7 @@ export default function Intro({ onFinish }: IntroProps) {
             "[BOOT] Intializing Jun Hua's Personal Site...",
             "\n[LOAD] Loading competent programming skills...",
             "\n[FAIL] ERROR: No competent programming skills found.",
-            "\n[LOAD] Loading charming_portrait.png...",
+            "\n[LOAD] Loading kdrama_portrait.png...",
             "\n[LOAD] Loading the rest of the code or whatever...",
             "\n[INFO] Website fully loaded! Welcome to my personal website!"
         ];
@@ -105,6 +105,7 @@ export default function Intro({ onFinish }: IntroProps) {
     return (
         <div className="intro-container">
             <div className="terminal">
+                {/* whiteSpace pre-line makes it so \n is factored in when typing out the messages. */}
                 <h2 className="terminal-text" style={{ whiteSpace: 'pre-line' }}>{typedText}<span className="cursor">|</span></h2>
             </div>
         </div>

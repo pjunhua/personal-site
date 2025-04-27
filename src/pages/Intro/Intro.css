@@ -1,5 +1,6 @@
 .intro-container {
     background-color: black;
+    /* 100vh and 100vw to ensure container occupies the full screen regardless of resolution. */
     height: 100vh;
     width: 100vw;
 }
@@ -7,37 +8,54 @@
 .terminal {
     background-color: #041704;
     border: 3px solid #39ff14;
+    /* By default, box-sizing is set to content-box. Meaning if you set the width to 300px, it only factors the content within. 
+       If you then specify padding/margin, the div will end up larger than 300px as it's not part of the content. By changing
+       it to border-box, the 300px will now factor in any padding/margin and keep it within the specified width. */
     box-sizing: border-box;
     padding: 30px;
-    min-width: 300px;
-    max-width: 90%;
+    /* 90% width ensures regardless of resolution it won't fill the whole screen as intended. 
+       min-height here ensures that it starts at a fixed height so it won't change height as
+       texts are being typed to make it seem more like a terminal window. Reasib why it's in
+       percentage rather than a fixed scale like px is that it's easier to find a dimension
+       I like, rather than having to find a specific px size for example, I can just cycle
+       through different percentages to see what I like. */
     min-height: 60%;
-    width: 100%;
+    width: 90%;
+    /* Fixed position ensures it always starts at the center as intended */
     position: fixed;
+    /* Top 50% and left 50% shifts the div 50% from the top and from the left, putting it in the center */
     top: 50%;
     left: 50%;
+    /* However, that only aligns the top left point of the div to the center. The rest is hanging at the bottom right. 
+       With transform translate, we move it to the left by 50% of the div's width, and up by 50% of the div's width,
+       centering the whole div to the page rather than just the top left point of the div. */
     transform: translate(-50%, -50%);
 }
 
 .terminal-text {
+    /* Margin 0 to remove the built-in margin from h2. I'm choosing to keep h2 because I like it's font weight. It's 
+       faster to put margin 0 then find the right font weight. */
     margin: 0px;
     color: #39ff14;
     font-family: "Share Tech", sans-serif;
+    /* Clamp makes the font scale according to the screen size while keeping it at a min and max font size. 
+       By default the font size is 4vw so it'll adjust accordingly to match the screen size to look good.
+       But, if 4vw becomes smaller than 16px or bigger than 24px, it'll stop at those values instead, to
+       ensure those on a smaller screen or a larger screen won't have weirdly sized text thanks to vw's
+       scalability. */
     font-size: clamp(16px, 4vw, 24px);
-    white-space: nowrap;
 }
 
 .cursor {
-    display: inline-block;
-    width: 10px;
-    height: 1em;
     background-color: #39ff14;
     margin-left: 4px;
+    /* Plays the custom animation blink on an infinite cycle. The blink animation lasts for only 1 second,
+       and step-start makes it like a on-off switch rather than a fade in or other transitions. */
     animation: blink 1s step-start infinite;
-    position: absolute;
 }
 
 @keyframes blink {
+    /* 50% through the 1s keyframe, change the opacity to 0, simulating a blink. */
     50% {
         opacity: 0;
     }
