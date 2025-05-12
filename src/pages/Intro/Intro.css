@@ -35,7 +35,7 @@
 .terminal-text {
     /* Margin 0 to remove the built-in margin from h2. I'm choosing to keep h2 because I like it's font weight. It's 
        faster to put margin 0 then find the right font weight. */
-    margin: 0px;
+    margin: 0;
     color: #39ff14;
     font-family: "Share Tech", sans-serif;
     /* Clamp makes the font scale according to the screen size while keeping it at a min and max font size. 
