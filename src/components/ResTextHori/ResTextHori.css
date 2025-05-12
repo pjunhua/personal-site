@@ -1,0 +1,11 @@
+.textbox {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.textbox h1{
+    line-height: 1;
+}
