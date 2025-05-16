@@ -196,7 +196,7 @@ export default function Home() {
                     <div className='hero-next-blinker'></div>
                     <p className='hero-message'>{selectedMessage}</p>
                 </div>
-                <img className='hero-image' src='./personal-site/img/transparent_profile.png' alt='Profile Shot of Jun Hua' />
+                <img className='hero-image' src='/personal-site/img/transparent_profile.png' alt='Profile Shot of Jun Hua' />
             </section>
             <section className='about-me' id='about-me' ref={navRefs.about}></section>
         </div>

@@ -4,15 +4,11 @@ html {
 }
 
 section {
-    height: 100vh;
+    max-width: 100%; /* 100% instead of 100vw because 100vw excludes the scrollbar which creates overflow */
+    max-height: 100svh;
+    height: 100svh;
     width: 100%;
     scroll-snap-align: start;
-}
-
-section, section * {
-    max-height: 100vh;
-    max-width: 100%;
-    box-sizing: border-box;
 }
 
 .hero-welcome-screen {
@@ -46,9 +42,7 @@ section, section * {
     background-color: rgba(0,0,0,0.6);
     border: solid 5px white;
     border-radius: 0px 10px 10px 10px;
-    max-width: 90%;
-    min-width: 800px;
-    width: 50%;
+    width: 800px;
     cursor: pointer;
 }
 
@@ -99,4 +93,15 @@ section, section * {
 
 .about-me {
     background-color: black;
+}
+
+@media (max-width: 1023px) {
+
+    .hero-message-box {
+        max-width: 90%;
+    }
+
+    .hero-message {
+        font-size: 20px;
+    }
 }

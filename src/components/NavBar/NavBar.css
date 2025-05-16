@@ -5,20 +5,16 @@
     top: 0;
     z-index: 99;
     justify-content: space-between;
-}
-
-.navbar,
-.navbar * {
-    max-height: 80px;
     display: flex;
     flex-direction: row;
-    box-sizing: border-box;
     align-items: center;
-    font-family: 'Monsterrat';
 }
 
 .nameLogo img {
     cursor: pointer;
+    max-height: 80px;
+    /* Replacing img's default display of inline to block helps center the img vertically */
+    display: block;
 }
 
 .navLinks {
@@ -26,9 +22,16 @@
     margin: 0;
     flex: 1;
     justify-content: space-between;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .middleNav {
+    /* Position absolute allows us to arrange it to the center of the navbar, left 50% positioned the top left
+       corner of middleNav 50% from the left which is the middle. Then we translate it 50% to the left so the
+       center of middleNav is now the one that's 50% away from the left, making it center. White space no wrap
+       makes it so the texts don't stack on top of each other when the screen gets smaller. */
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -36,6 +39,7 @@
 }
 
 .navLinks li {
+    list-style-type: none;
     cursor: pointer;
     color: #f6f1e6;
     font-size: 20px;
@@ -50,19 +54,113 @@
 
 .rightNav {
     margin-right: 50px;
+    display: flex;
+    flex-direction: row;
 }
 
 .signinButton {
-    all: unset;
+    background-color: transparent;
     cursor: pointer;
     border-radius: 100px;
     padding: 10px 20px;
     color: #f6f1e6;
     font-family: 'Rubik';
     font-weight: 500;
+    font-size: 16px;
     border: solid 2px #f6f1e6;
 }
 
 .signinButton:hover {
-    background-color: rgba(255,255,255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 1023px) {
+    .rightNav {
+        margin-right: 15px;
+    }
+
+    .hamburgerButton {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        margin-left: 10px;
+    }
+
+    .hamburgerIcon,
+    .hamburgerIcon::before,
+    .hamburgerIcon::after {
+        background-color: white;
+        width: 25px;
+        height: 4px;
+    }
+
+    .hamburgerIcon::before,
+    .hamburgerIcon::after {
+        content: '';
+        position: absolute;
+        transition: 0.5s;
+    }
+
+    .hamburgerIcon {
+        position: relative;
+    }
+
+    .hamburgerIcon::before {
+        top: -8px;
+    }
+
+    .hamburgerIcon::after {
+        bottom: -8px;
+    }
+
+    /* Hamburger Menu transition to X after click */
+
+    .rightNav.rightNavMobileActive .hamburgerIcon {
+        background-color: transparent;
+    }
+
+    .rightNav.rightNavMobileActive .hamburgerIcon::before {
+        top: 0;
+        transform: rotate(45deg);
+    }
+
+    .rightNav.rightNavMobileActive .hamburgerIcon::after {
+        top: 0;
+        transform: rotate(135deg);
+    }
+
+    .middleNav {
+        /* Remove unnecessary desktop transform as we're using navLink's align item to center it now that our width is fullscreen */
+        transform: unset;
+        /* Transform middleNav to a full screen div with a dark backdrop */
+        position: fixed;
+        background-color: transparent;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        /* Position it to the center of the full screen vertically */
+        display: flex;
+        align-items: center;
+        /* Temporarily hide it till expanded */
+        visibility: hidden;
+        /* Transition that triggers when middleNav becomes active to fade in bg color */
+        transition: background-color 0.5s ease;
+    }
+
+    .middleNavMobileActive {
+        visibility: visible;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .navLinks {
+        flex-direction: column;
+    }
+}
+
+/* For smaller width mobile devices */
+@media (max-width: 374px) {
+    .nameLogo img {
+        max-height: 70px;
+    }
 }
