@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Intro from './pages/Intro/Intro.tsx';
-import Home from './pages/Home/Home.tsx';
+import Intro from './pages/Intro/Intro';
+import Home from './pages/Home/Home';
 
 
 export default function HomepageIntroHandler() {

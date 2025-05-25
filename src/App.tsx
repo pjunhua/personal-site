@@ -1,16 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomepageIntroHandler from './HomepageIntroHandler.tsx';
-import Home from './pages/Home/Home.tsx'
+import HomepageIntroHandler from './HomepageIntroHandler';
+import Home from './pages/Home/Home'
 
 import './App.css'
 
 function App() {
   return (
-    <Router>
+    <Router basename="/personal-site">
       <Routes>
-        <Route path="/personal-site" element={<Home />} />
-        <Route path="/personal-site/terminal" element={<HomepageIntroHandler />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/terminal" element={<HomepageIntroHandler />} />
       </Routes>
     </Router>
   );

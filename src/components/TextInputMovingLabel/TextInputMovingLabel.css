@@ -1,0 +1,48 @@
+.timlDiv {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.timlInput{
+    width: 100%;
+    border-radius: 1000px;
+    height: 50px;
+    border: none;
+    padding: 0px 20px;
+}
+
+.timlInput:focus {
+    border: solid 2px green;
+    outline: none;
+}
+
+.timlLabel {
+    position: absolute;
+    /* left is set equal to the left padding here */
+    left: 20px;
+    /* Set top to half of timlInput height, excluding any vertical margin/padding,
+       then translateY centers the text. */
+    top: 25px;
+    transform: translateY(-50%);
+    font-size: 13px;
+    opacity: 60%;
+    transition: all 0.2s ease;
+}
+
+.timlInput:focus + label, .timlInput:not(:placeholder-shown) + label {
+    top: 10px;
+    font-size: 10px;
+}
+
+.timlError {
+    margin: 0 20px 0 20px;
+    color: red;
+    font-size: 13px;
+}
+
+/* For smaller width mobile devices */
+@media (max-width: 374px) {
+    .timlError {
+        font-size: 10px;
+    }
+}

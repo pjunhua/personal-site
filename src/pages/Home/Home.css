@@ -3,10 +3,15 @@ html {
     scroll-behavior: smooth;
 }
 
+body {
+    overflow: hidden;
+}
+
 section {
     max-width: 100%; /* 100% instead of 100vw because 100vw excludes the scrollbar which creates overflow */
-    max-height: 100svh;
-    height: 100svh;
+    max-height: 100dvh;
+    height: 100dvh;
+    min-height: 100svh; /* Fallback for browsers that don't support dvh */
     width: 100%;
     scroll-snap-align: start;
 }

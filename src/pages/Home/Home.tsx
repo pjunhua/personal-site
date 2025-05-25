@@ -1,19 +1,24 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Home.css';
-import NavBar from '../../components/NavBar/NavBar.tsx';
+import NavBar from '../../components/NavBar/NavBar';
 
 export default function Home() {
 
     // Object to contain the refs to all sections so handleNavigate can search for the right ref with a key
     const navRefs = {
         home: useRef<HTMLElement | null>(null),
-        about: useRef<HTMLElement | null>(null)
+        about: useRef<HTMLElement | null>(null),
+        projects: useRef<HTMLElement | null>(null),
     }
 
+    const navKeys: string[] = Object.keys(navRefs);
+
+    const currentSection = useRef<number>(0);
+
     // Receives the id of which nav element has been clicked to scroll to the right section
-    const handleNavigate = (sectionId) => {
+    const handleNavigate = (sectionId: keyof typeof navRefs) => {
         const section = navRefs[sectionId];
-        if (section) {
+        if (section.current) {
             section.current.scrollIntoView({ behavior: 'smooth' });
         }
     }
@@ -64,7 +69,7 @@ export default function Home() {
         // Get current hour to determine which array of messages from timebasedMessages to choose from
         const currentDate = new Date();
         const currentHour = currentDate.getHours();
-        let key: string = '';
+        let key: keyof typeof timebasedMessages = '24-5';
 
         // Based on the time, retrieve the appropriate set of messages by setting the right key
         if (currentHour >= 0 && currentHour < 5) {
@@ -178,27 +183,116 @@ export default function Home() {
         }
     }
 
+    /* == Scroll Replacement Related Declarations == */
+
+    const pauseScroll = useRef<boolean>(false);
+
+    // Temporarily stops any scroll behaviour while a menu like 'Sign In' is active
+    const handleScroll = (pause: boolean) => {
+        pauseScroll.current = pause ? true : false;
+    }
+
+    // Gets the time where the event listener was last triggered
+    const lastUpdate = useRef(0);
+
+    // Sets minimum delay before function in event listener can be triggered again
+    const scrollDelay = 400;
+
+    // When scrolling on desktop
+    window.addEventListener('wheel', (event) => {
+
+        if (pauseScroll.current) return;
+
+        const now = Date.now();
+
+        /* Gets the time difference of the current time from the last time this fn was triggered, then only 
+           trigger this function if the set delay timing has passed */
+        if (now - lastUpdate.current > scrollDelay) {
+            // deltaY more than 0 means scrolling down, less than 0 means scrolling up
+
+            /* If we're scrolling up, make sure that if we were to add 1 it wouldn't exceed the length and point to a section that doesn't exist. 
+               Else if we're scrolling down, after we minus 1, it wouldn't be less than 0 and be a negative section, which won't exist. */
+            if (event.deltaY > 0 && currentSection.current + 1 < navKeys.length) {
+                currentSection.current++;
+            } else if (event.deltaY < 0 && currentSection.current - 1 >= 0) {
+                currentSection.current--;
+            }
+
+            // Regardless scrolling up or down, trigger navigate and update the timer
+            const currentSectionName = navKeys[currentSection.current] as keyof typeof navRefs;
+            handleNavigate(currentSectionName);
+            lastUpdate.current = now;
+
+        }
+    });
+
+    // Know the starting touch point to determine the direction swiped
+    const touchPoint = useRef(0)
+
+    // When scrolling on mobile
+
+    // Gets y axis of initial touch point to use as reference when there's a swipe
+    window.addEventListener("touchstart", (event) => {
+        if (pauseScroll.current) return;
+        touchPoint.current = event.touches[0].clientY;
+    });
+
+    // When there's a swipe on mobile, get the ending point, based on it and the initial touch we can determine whether the direction of the swipe
+    window.addEventListener("touchmove", (event) => {
+
+        if (pauseScroll.current) return;
+
+        const now = Date.now();
+
+        // Avoids multiple triggers to update touchPoint
+        if (now - lastUpdate.current > scrollDelay) {
+            let swipeEndPoint = event.touches[0].clientY;
+
+            /* If swipeEndPoint is lower than touchPoint, it means the user swiped up, which in mobile orientation means the user is trying to
+               scroll down, so we follow the same logic as with the scroll listener. Conversely, if swipeEndPoint is higher than touchPoint, it
+               means the user swiped down to a lower point, which means they were trying to scroll up */
+            if (swipeEndPoint < touchPoint.current && currentSection.current + 1 < navKeys.length) {
+                currentSection.current++;
+            } else if (swipeEndPoint > touchPoint.current && currentSection.current - 1 >= 0) {
+                currentSection.current--;
+            }
+
+            // Regardless scrolling up or down, trigger navigate and update the timer
+            const currentSectionName = navKeys[currentSection.current] as keyof typeof navRefs;
+            handleNavigate(currentSectionName);
+            lastUpdate.current = now;
+        }
+    });
+
     useEffect(() => {
 
+        // Initiate display messages
         getHeroMessage();
+
+        // Ensures every refresh to sync the displayed section with the currentSection ref
+            const currentSectionName = navKeys[currentSection.current] as keyof typeof navRefs;
+            handleNavigate(currentSectionName);
 
         // eslint-disable-next-line
     }, [])
 
     return (
         <div>
-            <NavBar navigateRequest={(sectionId) => { handleNavigate(sectionId) }} />
-            <section className='hero-welcome-screen' ref={navRefs.home}>
-                <div className='hero-message-box' onClick={handleMessageClick}>
-                    <div className='hero-name-box'>
-                        <p className='hero-name-text'>Jun Hua</p>
+            <NavBar navigateRequest={(sectionId: keyof typeof navRefs) => { handleNavigate(sectionId) }} pauseScroll={(pause) => { handleScroll(pause) }} />
+            <div className='section-scroll'>
+                <section className='hero-welcome-screen' ref={navRefs.home}>
+                    <div className='hero-message-box' onClick={handleMessageClick}>
+                        <div className='hero-name-box'>
+                            <p className='hero-name-text'>Jun Hua</p>
+                        </div>
+                        <div className='hero-next-blinker'></div>
+                        <p className='hero-message'>{selectedMessage}</p>
                     </div>
-                    <div className='hero-next-blinker'></div>
-                    <p className='hero-message'>{selectedMessage}</p>
-                </div>
-                <img className='hero-image' src='/personal-site/img/transparent_profile.png' alt='Profile Shot of Jun Hua' />
-            </section>
-            <section className='about-me' id='about-me' ref={navRefs.about}></section>
+                    <img className='hero-image' src='/personal-site/img/transparent_profile.png' alt='Profile Shot of Jun Hua' />
+                </section>
+                <section className='about-me' id='about-me' ref={navRefs.about}></section>
+                <section className='my-projects' id='my-projects' ref={navRefs.projects}></section>
+            </div>
         </div>
     )
 }

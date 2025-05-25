@@ -58,7 +58,7 @@
     flex-direction: row;
 }
 
-.signinButton {
+.signInButton {
     background-color: transparent;
     cursor: pointer;
     border-radius: 100px;
@@ -70,7 +70,7 @@
     border: solid 2px #f6f1e6;
 }
 
-.signinButton:hover {
+.signInButton:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -162,5 +162,148 @@
 @media (max-width: 374px) {
     .nameLogo img {
         max-height: 70px;
+    }
+}
+
+
+
+/* == SIGN IN POPUP STYLES == */
+
+
+
+.clickableLink {
+    color: blue;
+    cursor: pointer;
+}
+
+.signInOnly {
+    display: none !important;
+}
+
+.signInPopup {
+    position: fixed;
+    z-index: 150;
+    width: 100dvw;
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.5s ease, visibility 0.5s ease;
+}
+
+.signInPopup * {
+    font-family: 'Rubik';
+}
+
+.signInPopupActive {
+    visibility: visible;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.signInPopupInactive {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.signInMenu {
+    position: fixed;
+    width: 600px;
+    max-width: 90%;
+    height: 600px;
+    background-color: #eddcc9;
+    z-index: 150;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    padding: 50px;
+}
+
+.signInMenu>*,
+.signInMenu>form>* {
+    width: 100%;
+}
+
+.signInPopupActive .signInMenu {
+    transform: translateY(0px);
+    opacity: 1;
+}
+
+.signInPopupInactive .signInMenu {
+    transform: translateY(-30px);
+    opacity: 0;
+}
+
+.signInPill {
+    cursor: pointer;
+    border-radius: 1000px;
+    height: 50px;
+    border: solid 1px;
+    padding: 0px 20px;
+    margin: 20px 0 20px 0;
+}
+
+.closeButton {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    margin: 10px;
+}
+
+.xIcon,
+.xIcon::after {
+    width: 20px;
+    height: 5px;
+    background-color: black;
+}
+
+.xIcon {
+    position: relative;
+    transform: rotate(45deg);
+}
+
+.xIcon::after {
+    content: '';
+    position: absolute;
+    transform: rotate(90deg);
+}
+
+.signInHeaderText {
+    margin: 0;
+}
+
+.signInDescriptionText {
+    margin: 5px 0 20px 0;
+}
+
+.rememberMe {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.resendVerificationCodeText {
+    margin: 0;
+}
+
+.forgetPasswordText {
+    margin: 0;
+}
+
+.toggleSignInOut {
+    margin: 0;
+}
+
+/* For smaller width mobile devices */
+@media (max-width: 374px) {
+    .signInDescriptionText {
+        font-size: 13px;
     }
 }
