@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import TextInputMovingLabel, { TIMLHandle } from '../TextInputMovingLabel/TextInputMovingLabel';
 import './NavBar.css';
 
@@ -410,24 +410,37 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         }
     }
 
+    const [resendTimerText, setResendTimerText] = useState<number>(0);
+
     const getNewVerificationCode = async () => {
-        const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getNewVerificationCode`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: emailKey.current })
-        });
+        if (resendTimerText === 0) {
+            const res = await fetch(`${process.env.REACT_APP_BASE_URL}/getNewVerificationCode`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: emailKey.current })
+            });
 
-
-        const data = await res.json();
-        console.log(`New verification code is ${data}!!!`);
-
-        if (!res.ok) {
-            console.error('Fetch failed:', res.status, res.statusText);
-            return;
+            if (!res.ok) {
+                console.error('Fetch failed:', res.status, res.statusText);
+                return;
+            } else {
+                setResendTimerText(60);
+            }
+        } else {
+            const vRef = verifyEmailRef.current;
+            if (vRef) {
+                vRef.setError('Please wait for timer to end before requesting a resend')
+            }
         }
     }
+
+    useEffect(() => {
+        if (resendTimerText !== 0) {
+            setTimeout(() => { setResendTimerText(currentTimer => currentTimer - 1) }, 1000);
+        }
+    }, [resendTimerText])
 
     const handleValidation = async (id: string) => {
         switch (id) {
@@ -469,17 +482,17 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                             <input type='checkbox' id='rememberMeCheck'></input>
                             <label htmlFor='rememberMeCheck'>Remember Me</label>
                         </div>)}
-                        {['VerifyEmail'].includes(signInFormState.current) && (<p className='clickableLink resendVerificationCodeText' onClick={getNewVerificationCode}>Resend verificaiton code</p>)}
+                        {['VerifyEmail'].includes(signInFormState.current) && (<p className={`clickableLink resendVerificationCodeText ${resendTimerText !== 0 ? 'disableResend' : ''}`} onClick={getNewVerificationCode}>Resend verificaiton code {(resendTimerText !== 0 && (<span className='resendTimer'>in {resendTimerText}</span>))}</p>)}
                         <button className='signInPill' type='submit'>{signInPillText}</button>
                     </form>
                     {['SignIn'].includes(signInFormState.current) && (<p className='clickableLink forgetPasswordText' onClick={toggleSignInForgetPassword}>Forgot your password?</p>)}
-                    <p className='toggleSignInOut'>{tSIOPreText} <span className='clickableLink' onClick={toggleSignInOut} style={{whiteSpace:'nowrap'}}>{tSIOText}</span></p>
+                    <p className='toggleSignInOut'>{tSIOPreText} <span className='clickableLink' onClick={toggleSignInOut} style={{ whiteSpace: 'nowrap' }}>{tSIOText}</span></p>
                 </div>
             </div>
             <nav className='navbar'>
                 <div className='leftNav'>
                     <div className='nameLogo' onClick={handleNavClick}>
-                        <img className='navObject' id='home' src='/personal-site/img/name_logo.png' alt='JUN HUA' style={{ padding: '20px' }} />
+                        <img className='navObject' id='home' src='/img/name_logo.png' alt='JUN HUA' style={{ padding: '20px' }} />
                     </div>
                 </div>
                 <div className='middleNav' ref={middleNavRef} onClick={handleMiddleNavClick}>

@@ -293,6 +293,11 @@
     margin: 0;
 }
 
+.disableResend {
+    color: gray;
+    cursor: not-allowed;
+}
+
 .forgetPasswordText {
     margin: 0;
 }

@@ -7,7 +7,7 @@ import './App.css'
 
 function App() {
   return (
-    <Router basename="/personal-site">
+    <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/terminal" element={<HomepageIntroHandler />} />
