@@ -58,9 +58,9 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
     /* == Sign In/Sign Up Related Declarations == */
 
     // If true, it means it should show Sign In, if false Sign Up, hence the name signInNotUp
-    const signInFormState = useRef<'SignIn' | 'SignUp' | 'ForgetPassword' | 'VerifyEmail'>('SignIn');
+    const signInFormState = useRef<'SignIn' | 'SignUp' | 'ForgetPassword' | 'VerifyEmail' | 'Success'>('SignIn');
 
-    const [signInHeaderText, setSignInHeaderText] = useState<'Sign In' | 'Sign Up' | 'Forget Password' | 'Verify Email Address'>('Sign In');
+    const [signInHeaderText, setSignInHeaderText] = useState<'Sign In' | 'Sign Up' | 'Forget Password' | 'Verify Email Address' | 'Success'>('Sign In');
     const [signInDescriptionText, setSignInDescriptionText] = useState<string>('Welcome back! Sign in to get access to features such as PLACEHOLDER!!!!!');
 
     const [passwordAutoComplete, setPasswordAutoComplete] = useState<'new-password' | 'current-password'>('current-password');
@@ -70,6 +70,9 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
 
     const [signInPillText, setSignInPillText] = useState<'Sign In' | 'Sign Up' | 'Reset Password' | 'Confirm Verification Code'>('Sign In');
 
+    const accessToken = useRef<string>('');
+
+    // Handles event based on form state when form is submitted
     const toggleSignInOut = () => {
         switch (signInFormState.current) {
             // From Sign In or Verify Email (OTP), toggle to Sign Up form
@@ -142,10 +145,32 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
     const verifyEmailRef = useRef<TIMLHandle | null>(null);
 
     const emailKey = useRef<string>('');
+    const passwordKey = useRef<string>('');
+
+    const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
     const signInProcess = (e: React.FormEvent<HTMLFormElement>) => {
+        // Prevents default behaviour like page reloading when form is submitted, retaining any input values to be handled
         e.preventDefault();
+        const test = async () => {
+            const res = await fetch(`${process.env.REACT_APP_BASE_URL}/checkCookies`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ accessTokenJwt: accessToken.current })
+            });
 
+            if (!res.ok) {
+                console.error('Fetch failed:', res.status, res.statusText);
+                return;
+            }
+        }
+
+        test();
+
+        // Find out the current intent of the form, be it to sign in/sign up/verify email with code/reset password
         const currentState = signInFormState.current;
 
         let eRef: TIMLHandle | null = null;
@@ -158,24 +183,33 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         let confirmPassword = '';
         let verifyEmail = '';
 
-        if (['SignIn', 'SignUp', 'ForgetPassword'].includes(signInFormState.current)) {
+        /* The following 'ifs' are to initialize the different inputs like email, password, confirm password, verification code as they refs are currently
+           null and the values blank, as seen right above this. We have to specify the form state as some form states like ForgetPassword may not have 
+           inputs like password or confirm password, so to avoid getting thrown an error for not having fields that are irrelevant, we only declare them
+           when we expect them in that specific form state. */
+
+        if (['SignIn', 'SignUp', 'ForgetPassword'].includes(currentState)) {
             eRef = emailRef.current;
             if (!eRef) throw new Error('emailRef not detected at form submission');
+
+            email = eRef.getInput();
+        }
+
+        if (['SignIn', 'SignUp'].includes(currentState)) {
             pRef = pwRef.current;
             if (!pRef) throw new Error('pwRef not detected at form submission');
 
-            email = eRef.getInput();
             password = pRef.getInput();
         }
 
-        if (['SignUp'].includes(signInFormState.current)) {
+        if (['SignUp'].includes(currentState)) {
             cRef = confirmPwRef.current;
             if (!cRef) throw new Error('confirmPwRef not detected at form submission');
 
             confirmPassword = cRef.getInput();
         }
 
-        if (['VerifyEmail'].includes(signInFormState.current)) {
+        if (['VerifyEmail'].includes(currentState)) {
             vRef = verifyEmailRef.current;
             if (!vRef) throw new Error('verifyEmailRef not detected at form submission');
 
@@ -185,8 +219,10 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         type ValidateResult = {
             validatePass: boolean
             errorMessage: { email: string, password: string, confirmPassword: string, verifyEmail: string }
+            accessToken: string
         }
 
+        // Based on the result from fetch requests, assign the error message to their corresponding inputs
         const handleErrorDisplay = (result: ValidateResult) => {
 
             // Double confirms that the validate failed, and thus have errors to display
@@ -218,6 +254,8 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                 throw new Error('handleErrorDisplay triggered when ValidateResult passed.');
             }
         }
+
+        // Sends different fetch requests based on the form state
         if (currentState === 'VerifyEmail') {
             if (verifyEmailValidation()) {
 
@@ -225,9 +263,10 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                     const res = await fetch(`${process.env.REACT_APP_BASE_URL}/verifyVerificationCode`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
+                            'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ email: emailKey.current, codeInput: verifyEmail })
+                        credentials: 'include',
+                        body: JSON.stringify({ email: emailKey.current, password: passwordKey.current, codeInput: verifyEmail })
                     });
 
                     if (!res.ok) {
@@ -241,7 +280,11 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                     if (!result.validatePass) {
                         handleErrorDisplay(result);
                     } else {
-                        console.log('SUCCCESSSSSSSSSSS')
+                        accessToken.current = result.accessToken;
+                        signInFormState.current = 'Success';
+                        setSignInHeaderText('Success');
+                        setSignInDescriptionText('Welcome! Your account has been successfully created! You have been automatically logged in and may close this window now.');
+                        setLoggedIn(true);
                     }
                 }
 
@@ -257,6 +300,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                             headers: {
                                 'Content-Type': 'application/json',
                             },
+                            credentials: 'include',
                             body: JSON.stringify({ email: email, password: password }),
                         });
 
@@ -265,8 +309,17 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                             return;
                         }
 
-                        const data = await res.json();
-                        console.log('Response data:', data);
+                        const result = await res.json();
+
+                        if (!result.validatePass) {
+                            handleErrorDisplay(result);
+                        } else {
+                            accessToken.current = result.accessToken;
+                            signInFormState.current = 'Success';
+                            setSignInHeaderText('Success');
+                            setSignInDescriptionText('Welcome! You have successfully logged in, you may close this window now.');
+                            setLoggedIn(true);
+                        }
                     } catch (error) {
                         console.error('Network error:', error);
                     }
@@ -291,7 +344,6 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                         }
 
                         const result = await res.json();
-                        console.log(result);
 
                         // Only trigger error display when the validation is marked as fail
                         if (!result.validatePass) {
@@ -304,6 +356,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                             setTSIOPreText('Want to change something?');
                             setTSIOText('Sign Up');
                             emailKey.current = email;
+                            passwordKey.current = password;
                         }
                     } catch (error) {
                         console.error('Network error:', error);
@@ -436,6 +489,48 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         }
     }
 
+    // Invoked when updating an expired/missing Access Token, or to check if logged in, Refresh Token must exist and be valid
+    const tokenUpdates = async () => {
+        const res = await fetch(`${process.env.REACT_APP_BASE_URL}/tokenUpdates`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ accessTokenJwt: accessToken.current })
+        });
+
+        if (!res.ok) {
+            console.error('Fetch failed:', res.status, res.statusText);
+            return;
+        }
+
+        const result = await res.json();
+
+        if (!result.validatePass) {
+            // Means no valid Refresh Token, which can only be created by logging in
+            return false;
+        } else {
+            // Means valid Refresh Token with valid Access Token
+            accessToken.current = result.accessToken;
+            return true;
+        }
+    }
+
+    useEffect(() => {
+        const checkLoginStatus = async () => {
+            const res = await tokenUpdates();
+
+            // res true means valid Refresh & Access Token, so to be treated as logged in
+            if (res) {
+                setLoggedIn(true);
+            }
+        }
+
+        checkLoginStatus();
+    }, []);
+
+    // useEffect to display the countdown timer live for resending verification code
     useEffect(() => {
         if (resendTimerText !== 0) {
             setTimeout(() => { setResendTimerText(currentTimer => currentTimer - 1) }, 1000);
@@ -483,10 +578,10 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                             <label htmlFor='rememberMeCheck'>Remember Me</label>
                         </div>)}
                         {['VerifyEmail'].includes(signInFormState.current) && (<p className={`clickableLink resendVerificationCodeText ${resendTimerText !== 0 ? 'disableResend' : ''}`} onClick={getNewVerificationCode}>Resend verificaiton code {(resendTimerText !== 0 && (<span className='resendTimer'>in {resendTimerText}</span>))}</p>)}
-                        <button className='signInPill' type='submit'>{signInPillText}</button>
+                        {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail'].includes(signInFormState.current) && (<button className='signInPill' type='submit'>{signInPillText}</button>)}
                     </form>
                     {['SignIn'].includes(signInFormState.current) && (<p className='clickableLink forgetPasswordText' onClick={toggleSignInForgetPassword}>Forgot your password?</p>)}
-                    <p className='toggleSignInOut'>{tSIOPreText} <span className='clickableLink' onClick={toggleSignInOut} style={{ whiteSpace: 'nowrap' }}>{tSIOText}</span></p>
+                    {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail'].includes(signInFormState.current) && (<p className='toggleSignInOut'>{tSIOPreText} <span className='clickableLink' onClick={toggleSignInOut} style={{ whiteSpace: 'nowrap' }}>{tSIOText}</span></p>)}
                 </div>
             </div>
             <nav className='navbar'>
@@ -504,9 +599,9 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                     </ul>
                 </div>
                 <div className='rightNav' ref={rightNavRef}>
-                    <div className='signInLogin' onClick={handleSignInButtonClick}>
+                    {!loggedIn && (<div className='signInLogin' onClick={handleSignInButtonClick}>
                         <button className='signInButton'>Sign In</button>
-                    </div>
+                    </div>)}
                     <div className='hamburgerButton' onClick={handleHamburgerClick}>
                         <div className='hamburgerIcon'></div>
                     </div>
