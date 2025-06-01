@@ -152,23 +152,6 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
     const signInProcess = (e: React.FormEvent<HTMLFormElement>) => {
         // Prevents default behaviour like page reloading when form is submitted, retaining any input values to be handled
         e.preventDefault();
-        const test = async () => {
-            const res = await fetch(`${process.env.REACT_APP_BASE_URL}/checkCookies`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ accessTokenJwt: accessToken.current })
-            });
-
-            if (!res.ok) {
-                console.error('Fetch failed:', res.status, res.statusText);
-                return;
-            }
-        }
-
-        test();
 
         // Find out the current intent of the form, be it to sign in/sign up/verify email with code/reset password
         const currentState = signInFormState.current;
