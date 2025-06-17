@@ -1,0 +1,39 @@
+.upperSection {
+    height: 85%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+}
+
+.lowerSection {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+    background-color: antiquewhite;
+    background-position: center;
+    background-size: cover;
+    filter: grayscale(0.75);
+}
+
+.projectTitle {
+    margin: 0;
+    width: 100%;
+    height: 40px;
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
+    color: white;
+    font-family: 'Rubik';
+    background-color: rgba(0,0,0,0.3);
+    text-align: center;
+    /* Doesn't allow any overflow text, and converts any to ... to fit. Applies even if there's spaces rather than breaking to a new line. */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.isActive {
+    box-shadow: inset 0 0 0 5px #a45e3b;
+    filter: grayscale(0);
+}

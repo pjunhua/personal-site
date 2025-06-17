@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import TextInputMovingLabel, { TIMLHandle } from '../TextInputMovingLabel/TextInputMovingLabel';
+import { useLogIn } from '../../context/LogInContext';
 import './NavBar.css';
 
 type navIds = 'home' | 'about' | 'projects'
@@ -70,7 +71,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
 
     const [signInPillText, setSignInPillText] = useState<'Sign In' | 'Sign Up' | 'Reset Password' | 'Confirm Verification Code'>('Sign In');
 
-    const accessToken = useRef<string>('');
+    const { accessToken, setAccessToken, loggedIn } = useLogIn();
 
     // Handles event based on form state when form is submitted
     const toggleSignInOut = () => {
@@ -146,8 +147,6 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
 
     const emailKey = useRef<string>('');
     const passwordKey = useRef<string>('');
-
-    const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
     const signInProcess = (e: React.FormEvent<HTMLFormElement>) => {
         // Prevents default behaviour like page reloading when form is submitted, retaining any input values to be handled
@@ -263,11 +262,11 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                     if (!result.validatePass) {
                         handleErrorDisplay(result);
                     } else {
-                        accessToken.current = result.accessToken;
+                        loggedIn.current = true;
+                        setAccessToken(result.accessToken);
                         signInFormState.current = 'Success';
                         setSignInHeaderText('Success');
                         setSignInDescriptionText('Welcome! Your account has been successfully created! You have been automatically logged in and may close this window now.');
-                        setLoggedIn(true);
                     }
                 }
 
@@ -297,11 +296,11 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                         if (!result.validatePass) {
                             handleErrorDisplay(result);
                         } else {
-                            accessToken.current = result.accessToken;
+                            loggedIn.current = true;
+                            setAccessToken(result.accessToken);
                             signInFormState.current = 'Success';
                             setSignInHeaderText('Success');
                             setSignInDescriptionText('Welcome! You have successfully logged in, you may close this window now.');
-                            setLoggedIn(true);
                         }
                     } catch (error) {
                         console.error('Network error:', error);
@@ -480,7 +479,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({ accessTokenJwt: accessToken.current })
+            body: JSON.stringify({ accessTokenJwt: accessToken })
         });
 
         if (!res.ok) {
@@ -491,23 +490,19 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         const result = await res.json();
 
         if (!result.validatePass) {
-            // Means no valid Refresh Token, which can only be created by logging in
-            return false;
+            // Means no valid Refresh Token, which can only be created by logging in, set access token to blank to indicate logged out
+            loggedIn.current = false;
+            setAccessToken('');
         } else {
             // Means valid Refresh Token with valid Access Token
-            accessToken.current = result.accessToken;
-            return true;
+            loggedIn.current = true;
+            setAccessToken(result.accessToken);
         }
     }
 
     useEffect(() => {
         const checkLoginStatus = async () => {
-            const res = await tokenUpdates();
-
-            // res true means valid Refresh & Access Token, so to be treated as logged in
-            if (res) {
-                setLoggedIn(true);
-            }
+            await tokenUpdates();
         }
 
         checkLoginStatus();
@@ -543,7 +538,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
     }
 
     return (
-        <div>
+        <>
             <div className='signInPopup signInPopupInactive' ref={signInPopupRef} onClick={handleSignInPopupClick}>
                 <div className='signInMenu'>
                     <div className='closeButton' onClick={handleSignInMenuCloseClick}>
@@ -560,7 +555,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                             <input type='checkbox' id='rememberMeCheck'></input>
                             <label htmlFor='rememberMeCheck'>Remember Me</label>
                         </div>)}
-                        {['VerifyEmail'].includes(signInFormState.current) && (<p className={`clickableLink resendVerificationCodeText ${resendTimerText !== 0 ? 'disableResend' : ''}`} onClick={getNewVerificationCode}>Resend verificaiton code {(resendTimerText !== 0 && (<span className='resendTimer'>in {resendTimerText}</span>))}</p>)}
+                        {['VerifyEmail'].includes(signInFormState.current) && (<p className={`clickableLink resendVerificationCodeText ${resendTimerText !== 0 ? 'disableResend' : ''}`} onClick={getNewVerificationCode}>Resend verification code {(resendTimerText !== 0 && (<span className='resendTimer'>in {resendTimerText}</span>))}</p>)}
                         {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail'].includes(signInFormState.current) && (<button className='signInPill' type='submit'>{signInPillText}</button>)}
                     </form>
                     {['SignIn'].includes(signInFormState.current) && (<p className='clickableLink forgetPasswordText' onClick={toggleSignInForgetPassword}>Forgot your password?</p>)}
@@ -582,7 +577,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                     </ul>
                 </div>
                 <div className='rightNav' ref={rightNavRef}>
-                    {!loggedIn && (<div className='signInLogin' onClick={handleSignInButtonClick}>
+                    {!loggedIn.current && (<div className='signInLogin' onClick={handleSignInButtonClick}>
                         <button className='signInButton'>Sign In</button>
                     </div>)}
                     <div className='hamburgerButton' onClick={handleHamburgerClick}>
@@ -590,6 +585,6 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                     </div>
                 </div>
             </nav>
-        </div>
+        </>
     )
 }

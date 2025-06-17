@@ -1,0 +1,27 @@
+.light {
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    background-color: #ffb347;
+    box-shadow: 0 0 12px 6px #ffb347;
+    border-radius: 20px;
+    z-index: 20;
+    bottom: 0%;
+    animation: floatUp linear 7s forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 0;
+        bottom: 0%;
+    }
+
+    5%, 60% {
+        opacity: 100%;
+    }
+
+    100% {
+        opacity: 0;
+        bottom: 100%;
+    }
+}

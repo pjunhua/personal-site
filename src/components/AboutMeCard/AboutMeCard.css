@@ -1,0 +1,129 @@
+.canvas {
+    width: inherit;
+    max-width: inherit;
+    height: inherit;
+    max-height: inherit;
+    position: absolute;
+}
+
+.card {
+    cursor: pointer;
+    width: 700px;
+    max-width: 90%;
+    height: 500px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #eddcc9;
+    transition: transform linear 0.2s;
+}
+
+.cardTitle {
+    font-family: 'Rubik';
+    font-size: 50px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.cardBody {
+    font-family: 'Rubik';
+    white-space: pre-line;
+}
+
+.transitioning {
+    transform: translate(50%, -50%);
+}
+
+.aboutMeImages {
+    width: inherit;
+    max-width: inherit;
+    height: inherit;
+    max-height: inherit;
+    position: relative;
+}
+
+.aboutMeImages > img {
+    position: absolute;
+    visibility: hidden;
+    width: 15.625%;
+    z-index: 29;
+    transition: top linear 0.2s, left linear 0.2s, bottom linear 0.2s, right linear 0.2s, visibility linear 0.2s;
+}
+
+.tlImage {
+    top: -15%;
+    left: -35%;
+}
+
+.tlImageActive {
+    top: 5%;
+    left: 7%;
+    visibility: visible !important;
+}
+
+.trImage {
+    top: -15%;
+    right: -35%;
+}
+
+.trImageActive {
+    top: 5%;
+    right: 7%;
+    visibility: visible !important;
+}
+
+.blImage {
+    bottom: -15%;
+    left: -35%;
+}
+
+.blImageActive {
+    bottom: 5%;
+    left: 7%;
+    visibility: visible !important;
+}
+
+.brImage {
+    bottom: -15%;
+    right: -35%;
+}
+
+.brImageActive {
+    bottom: 5%;
+    right: 7%;
+    visibility: visible !important;
+}
+
+.nextTitle {
+    font-family: 'Rubik';
+    text-decoration: underline;
+}
+
+@media (max-width: 778px) {
+    .cardTitle {
+        font-size: 40px;
+    }
+    .aboutMeImages > img {
+        width: 100px;
+    }
+    .tlImage, .trImage {
+        top: 6%;
+    }
+    .blImage, .brImage {
+        bottom: 6%;
+    }
+}
+
+@media (max-width: 388px) {
+    .cardTitle {
+        font-size: 30px;
+    }
+    .cardBody, .nextTitle {
+        font-size: 12px;
+    }
+}

@@ -1,112 +1,42 @@
-html {
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
-}
-
 body {
+    /* The ultimate fix to mobile address bars hiding and causing resize issues because the avaialble height changes */
+    position: fixed;
+    height: 100%;
+    width: 100%;
     overflow: hidden;
 }
 
 section {
-    max-width: 100%; /* 100% instead of 100vw because 100vw excludes the scrollbar which creates overflow */
-    max-height: 100dvh;
-    height: 100dvh;
-    min-height: 100svh; /* Fallback for browsers that don't support dvh */
+    height: 100%;
     width: 100%;
-    scroll-snap-align: start;
+    transform: translateY(0%);
+    transition: transform 0.2s linear;
+}
+
+.sectionUp {
+    transform: translateY(-100%);
 }
 
 .hero-welcome-screen {
     background: linear-gradient(45deg, #b8875b, #d6ae7b, #cbb092, #bb8f76);
     background-size: 400% 400%;
     position: relative;
-    z-index: 1;
+    z-index: 5;
     display: flex;
     justify-content: center;
-    width: 100vw;
-    height: 100vh;
     overflow: hidden;
     animation: gradient 10s infinite;
 }
 
-@keyframes gradient {
-    0% {background-position: 0% 100%;}
-    50% {background-position: 100% 0%;}
-    100% {background-position: 0% 100%;}
-}
-
-.hero-image {
-    display: block;
-    object-fit: cover;
-}
-
-.hero-message-box {
-    position: absolute;
-    bottom: 5%;
-    z-index: 2;
-    background-color: rgba(0,0,0,0.6);
-    border: solid 5px white;
-    border-radius: 0px 10px 10px 10px;
-    width: 800px;
-    cursor: pointer;
-}
-
-.hero-name-box {
-    cursor: default;
-    position: absolute;
-    background-color: rgba(0,0,0,0.6);
-    height: 70px;
-    border: solid 5px white;
-    top: 0%;
-    transform: translate(-5px, -100%);
-    border-radius: 10px 10px 0px 0px;
-    display: flex;
-    align-items: center;
-}
-
-.hero-name-text {
-    margin: 0px 20px 0px 20px;
-    font-size: 30px;
-    color: #f6f1e6;
-    font-family: 'Rubik';
-}
-
-.hero-message {
-    margin: 20px;
-    font-size: 25px;
-    color: #f6f1e6;
-    font-family: 'Rubik';
-}
-
-.hero-next-blinker {
-    margin: 8px;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    height: 0;
-    width: 0;
-    border-top: 16px solid #f6f1e6;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    animation: next-blink 1s infinite alternate;
-}
-
-@keyframes next-blink {
-    from {opacity: 0.4}
-    to {opacity: 1}
-}
-
 .about-me {
-    background-color: black;
+    background: linear-gradient(to bottom, #050517 0%, #0b0f2a 40%, #131a3a 100%);
+    position: absolute;
+    top: 0%;
+    z-index: 4;
 }
 
-@media (max-width: 1023px) {
-
-    .hero-message-box {
-        max-width: 90%;
-    }
-
-    .hero-message {
-        font-size: 20px;
-    }
+.my-projects {
+    position: absolute;
+    top: 0%;
+    z-index: 3;
 }

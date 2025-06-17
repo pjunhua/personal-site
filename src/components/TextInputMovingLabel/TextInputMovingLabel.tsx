@@ -14,11 +14,13 @@ export interface TIMLHandle {
     setError: (errorMsg: string) => void
 }
 
+// forwardRef allows the use of useImperativeHandle
 const TextInputMovingLabel = forwardRef<TIMLHandle, timlProps>(({ type, id, autoComplete, labelText, validateInput }, ref) => {
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [errorText, setErrorText] = useState<string>('');
 
+    // Allows parent component to access these, usually only the child can invoke a parent's function
     useImperativeHandle(ref, () => ({
 
         getInput: () => {

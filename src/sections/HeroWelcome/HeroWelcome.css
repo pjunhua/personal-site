@@ -1,0 +1,136 @@
+@keyframes gradient {
+    0% {
+        background-position: 0% 100%;
+    }
+
+    50% {
+        background-position: 100% 0%;
+    }
+
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+.hero-image {
+    display: block;
+    object-fit: cover;
+}
+
+.hero-message-box {
+    position: absolute;
+    bottom: 5%;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: solid 5px white;
+    border-radius: 0px 10px 10px 10px;
+    cursor: pointer;
+    width: 0px;
+}
+
+@media (max-width: 1023px) {
+
+    .hero-message-box {
+        max-width: 90%;
+    }
+
+    .hero-message {
+        font-size: 20px !important;
+    }
+}
+
+.open-hero-message-box {
+    animation: openHeroMsgBox 0.8s linear forwards;
+}
+
+@keyframes openHeroMsgBox {
+    0% {
+        width: 0px;
+    }
+
+    100% {
+        width: 800px;
+    }
+}
+
+.hero-name-box {
+    cursor: default;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.6);
+    height: 70px;
+    border: solid 5px white;
+    top: 0%;
+    transform: translate(-5px, -100%);
+    border-radius: 10px 10px 0px 0px;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+}
+
+.open-hero-name-box {
+    animation: openHeroNameBox 0.4s ease forwards;
+    animation-delay: 1.1s;
+}
+
+@keyframes openHeroNameBox {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.hero-name-text {
+    margin: 0px 20px 0px 20px;
+    font-size: 30px;
+    color: #f6f1e6;
+    font-family: 'Rubik';
+}
+
+.hero-message {
+    margin: 20px;
+    font-size: 25px;
+    color: #f6f1e6;
+    font-family: 'Rubik';
+}
+
+.hero-next-blinker {
+    margin: 8px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 0;
+    width: 0;
+    border-top: 16px solid #f6f1e6;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    opacity: 0;
+}
+
+.open-hero-next-blinker {
+    animation: openHeroNextBlinker 0.4s ease forwards;
+    animation: next-blink 1s infinite alternate;
+    animation-delay: 1.1s, 1.5s;
+}
+
+@keyframes openHeroNextBlinker {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes next-blink {
+    from {
+        opacity: 0.4
+    }
+
+    to {
+        opacity: 1
+    }
+}
