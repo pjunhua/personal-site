@@ -38,7 +38,7 @@ export default function FloatingLights() {
 
     useEffect(() => {
 
-        const clearLightArray =()=> {
+        const clearLightArray = () => {
 
             // Stops the nested loop when clicking out of tab, starts the nested loop when clicking in
             if (document.visibilityState === 'hidden') {
@@ -63,7 +63,7 @@ export default function FloatingLights() {
             generatingLight.current = true;
         }
 
-        return ()=>{
+        return () => {
             document.removeEventListener('visibilitychange', clearLightArray);
         }
 
@@ -74,7 +74,7 @@ export default function FloatingLights() {
         <>
             {
                 lightArray.map((light) => (
-                    <div key={light.id} className='light' style={{ left: `${light.axis}%` }} onAnimationEnd={()=>handleAnimationEnd(light.id)}></div>
+                    <div key={light.id} className='light' style={{ left: `${light.axis}%` }} onAnimationEnd={() => handleAnimationEnd(light.id)}></div>
                 ))
             }
         </>

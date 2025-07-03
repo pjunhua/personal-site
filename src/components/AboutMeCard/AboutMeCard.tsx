@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import './AboutMeCard.css';
+import IgnoreScroll from '../IgnoreScroll/IgnoreScroll';
 
 interface AboutMeCardProps {
     title: string;
@@ -35,8 +36,10 @@ export default function AboutMeCard({ title, nextTitle, bodyText, zIndexObject, 
             </div>
             <div className={`card ${startAni ? 'transitioning' : ''}`} onClick={transitionNext} style={{ zIndex: zIndexObject.zIndex }}>
                 <h1 className='cardTitle'>{title}</h1>
-                <p className='cardBody'>{bodyText}</p>
-                <p className='nextTitle'>Click to view the next section: {nextTitle} →</p>
+                <IgnoreScroll>
+                    <p className='cardBody'>{bodyText}</p>
+                </IgnoreScroll>
+                <p className='nextTitle'>Click to view the next section:<br /><span style={{ whiteSpace: 'nowrap' }}>{nextTitle} →</span></p>
             </div>
         </div>
     )

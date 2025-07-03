@@ -10,10 +10,10 @@
     cursor: pointer;
     width: 700px;
     max-width: 90%;
-    height: 500px;
-    padding: 20px;
+    height: 60%;
+    padding: 40px 20px 10px 20px;
     display: flex;
-    align-items: center;
+    justify-content: space-between;
     flex-direction: column;
     position: absolute;
     top: 50%;
@@ -27,7 +27,7 @@
     font-family: 'Rubik';
     font-size: 50px;
     text-align: center;
-    margin: 20px 0;
+    margin: 0;
 }
 
 .cardBody {
@@ -47,7 +47,7 @@
     position: relative;
 }
 
-.aboutMeImages > img {
+.aboutMeImages>img {
     position: absolute;
     visibility: hidden;
     width: 15.625%;
@@ -102,19 +102,25 @@
 .nextTitle {
     font-family: 'Rubik';
     text-decoration: underline;
+    text-align: right;
 }
 
 @media (max-width: 778px) {
     .cardTitle {
         font-size: 40px;
     }
-    .aboutMeImages > img {
+
+    .aboutMeImages>img {
         width: 100px;
     }
-    .tlImage, .trImage {
+
+    .tlImage,
+    .trImage {
         top: 6%;
     }
-    .blImage, .brImage {
+
+    .blImage,
+    .brImage {
         bottom: 6%;
     }
 }
@@ -123,7 +129,9 @@
     .cardTitle {
         font-size: 30px;
     }
-    .cardBody, .nextTitle {
+
+    .cardBody,
+    .nextTitle {
         font-size: 12px;
     }
 }
