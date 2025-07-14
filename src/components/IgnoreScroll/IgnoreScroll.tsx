@@ -10,10 +10,16 @@ export default function IgnoreScroll({ children }: IgnoreScrollProps) {
 
     useEffect(() => {
         const iR = ignoreRef.current
-        if (!iR) throw new Error('Ignnore ref not detected at ignore scroll component');
+        if (!iR) throw new Error('Ignore ref not detected at ignore scroll component');
+
+        // If they're equal it means there's no scroll in this screen resolution, so we shouldn't block the navigation
+        if (iR.scrollHeight === iR.clientHeight) {
+            iR.classList.remove('ignoreScroll');
+            return;
+        }
 
         /* 
-           Setup of ignore scrolls for page navigation based on how far the user has scrolled down.
+           Setup of ignoreNav for up/down page navigation based on how far the user has scrolled down.
            If they have not scrolled down yet, they should be allowed to scroll up a page but not down.
            If they are scrolled all the way down, they can scroll down to the next page but not up.
            This is to make it so while trying to read more of the overflow, it won't trigger the page navigation. 
@@ -28,38 +34,30 @@ export default function IgnoreScroll({ children }: IgnoreScrollProps) {
            all the way down. So it's a workaround for that scenario.
         */
 
-        const handleOnScrollEnd = () => {
+        const handleScroll = () => {
+            iR.classList.add('ignoreNavUp');
+            iR.classList.add('ignoreNavDown');
+
+            // Equal 0 means user has yet to scroll and is at the top of the scroll overflow, so they should be allowed to navigate up
             if (iR.scrollTop === 0) {
-                iR.classList.remove('ignoreScrollUp');
-            } else if (Math.ceil(iR.scrollTop) === iR.scrollHeight - iR.clientHeight) {
-                iR.classList.remove('ignoreScrollDown');
+                // Timeout makes it so when user is scrolling up fast they don't accidentally trigger nav up
+                setTimeout(() => iR.classList.remove('ignoreNavUp'), 500);
+            }
+
+            // scrollHeight - clientHeight gives the maximum scroll length, if scrollTop is equal to it, it means user has scrolled the full length to the very bottom and should be allowed to navigate down
+            if (Math.ceil(iR.scrollTop) === iR.scrollHeight - iR.clientHeight) {
+                // Timeout makes it so when user is scrolling down fast they don't accidentally trigger nav down
+                setTimeout(() => iR.classList.remove('ignoreNavDown'), 500);
             }
         }
 
-        const handleOnPointerDown = () => {
-            // Not equal 0 means user has already scrolled down, so we should ignoreScrollUp for the navigation so the user can scroll up on the text
-            if (iR.scrollTop !== 0) {
-                iR.classList.add('ignoreScrollUp');
-            }
+        iR.addEventListener('scroll', handleScroll);
 
-            /* scrollHeight is the total height of the text including what's hidden, clientHeight is the total height of the visible text.
-               So scrollHeight - clientHeight will give the maximum amount of length you can scroll. If scrollTop is not at equal to the
-               maximum point, it means there is still more content to scroll down to, as such, we should ignoreScrollDown for the navigation
-               so the user can scroll down on the text. */
-            if (Math.ceil(iR.scrollTop) !== iR.scrollHeight - iR.clientHeight) {
-                iR.classList.add('ignoreScrollDown');
-            }
+        // Initial setup of ignoreNavUp/ignoreNavDown classes
+        handleScroll();
 
-            iR.removeEventListener('scrollend', handleOnScrollEnd);
-            iR.addEventListener('scrollend', handleOnScrollEnd);
-        }
-
-        // Removes any current listeners to prevent stacking
-        iR.removeEventListener('pointerdown', () => handleOnPointerDown());
-
-        // If they're not the same it means there's overflow
-        if (iR.clientHeight !== iR.scrollHeight) {
-            iR.addEventListener('pointerdown', () => handleOnPointerDown());
+        return () => {
+            iR.removeEventListener('scroll', handleScroll);
         }
 
     }, []);
@@ -73,7 +71,8 @@ export default function IgnoreScroll({ children }: IgnoreScrollProps) {
                         ...children.props.style,
                         overflowY: 'auto',
                         scrollbarGutter: 'stable'
-                    }
+                    },
+                    className: `${children.props.className ?? ''} ignoreScroll`
                 })}
             </>
         )

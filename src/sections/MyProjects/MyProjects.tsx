@@ -2,64 +2,66 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, wrap, useAnimationControls } from 'framer-motion';
 import './MyProjects.css';
 import IgnoreScroll from '../../components/IgnoreScroll/IgnoreScroll';
+import { projectCard, projectArray } from './ProjectCardData';
 
 export default function MyProjects() {
 
-    type projectCard = {
-        bannerImageUrl: string,
-        video: { url: string, hasAudio: boolean },
-        title: string,
-        description: string,
-        id: number
+    const mainVideoRef = useRef<HTMLVideoElement | null>(null);
+    const bgVideoRef = useRef<HTMLVideoElement | null>(null);
+
+    const pauseVideos = () => {
+        const mVR = mainVideoRef.current;
+        const bVR = bgVideoRef.current;
+
+        if (mVR && bVR) {
+            mVR.pause();
+            bVR.pause();
+        }
+    }
+
+    // For when the main video is paused via media buttons, the bgVideo will keep playing otherwise
+    const pauseBgVideo =()=> {
+        const bVR = bgVideoRef.current;
+        if (bVR) {
+            bVR.pause();
+        }
+    }
+
+    const playVideos = () => {
+        const mVR = mainVideoRef.current;
+        const bVR = bgVideoRef.current;
+
+        if (mVR && bVR) {
+            // If play is triggered while a video is being loaded it'll throw an error that needs to be handled, we have onCanPlay on the actual video html itself to play once it's ready
+            mVR.play().catch((e) => console.log(e));
+            bVR.play().catch((e) => console.log(e));
+        }
+    }
+
+    // For when the main video has resumed playing via media buttons, the bgVideo will remain paused otherwise
+    const playBgVideo =()=> {
+        const bVR = bgVideoRef.current;
+        if (bVR) {
+            bVR.play();
+        }
+    }
+
+    const toggleMuteVideo = () => {
+        const mVR = mainVideoRef.current;
+
+        if (!mVR) throw new Error('Main video player not detected at toggle');
+
+        if (mVR.muted) {
+            mVR.muted = false;
+        } else {
+            mVR.muted = true;
+        }
     }
 
     type displayObject = {
         card: projectCard,
         position: number
     }
-
-    const projectCard1: projectCard = {
-        bannerImageUrl: "url('/img/thumbnail_pcard/thumbnail_pcard_psthumb.png')",
-        video: { url: '/video/thumbnails.mp4', hasAudio: false },
-        title: 'Photoshop: Video Thumbnails',
-        description: 'Along with video editing, another part of my content creation hobby is creating thumbnails for videos.\n\nI mainly use Photoshop and I have been creating thumbnails for years as seen in the video. I did not have any related studies in this field so it may not be very good, but there are quite a few thumbnails that I am proud of.\n\nThe progress of my thumbnail creation journey can also be seen in the video, the further back it goes, the changes in quality and style are quite evident.',
-        id: 0
-    }
-
-    const projectCard2: projectCard = {
-        bannerImageUrl: "url('/img/thumbnail_pcard/thumbnail_pcard_custompc.png')",
-        video: { url: '/video/neocities.mp4', hasAudio: false },
-        title: "My First Website: LBGz's Custom PC Services",
-        description: "I made this for one of my first-year modules in Singapore Polytechnic, and it was my first ever website created since I started learning programming. It is by no means good or functional, but, it's nice to look back on it and see how much has changed since I first started.\n\nYou can visit it yourself by going to wryyy.neocities.org as shown in the video.",
-        id: 1
-    }
-
-    const projectCard3: projectCard = {
-        bannerImageUrl: "url('/img/thumbnail_pcard/thumbnail_pcard_edits.png')",
-        video: { url: '/video/shorts_compilation.mp4', hasAudio: true },
-        title: 'Video Editing: YouTube Shorts',
-        description: 'As a hobby, I like to make edits of scenes from an anime, in-game, a livestream clip, or sometimes a combination of them.\n\nThese edits were made with Filmora and they are by no means super professional as I have no education background in this field, but I am satisfied with the results!',
-        id: 2
-    }
-
-    const projectCard4: projectCard = {
-        bannerImageUrl: "url('/img/thumbnail_pcard/thumbnail_pcard_sheets.png')",
-        video: { url: '/video/paradestate.mp4', hasAudio: false },
-        title: 'Apps Script: Data Transfer Across Sheets',
-        description: "This was a solution I made to an actual issue I faced during my Full-Time National Service. It was my first time hearing of Google Apps Script and decided to take the challenge to learn it.\n\nFor my vocation, I had to work with another unit on a daily basis along with my actual unit. To let our unit know of our status everyday like if we were on leave, MC, or working as per usual, we update our parade state Google Sheet every week. Our partner unit needed to know of our daily statuses as well, but, we couldn't directly share the same parade state Google Sheet as it contained confidential information of other unit personnels' statuses that weren't involved in this unit partnership.\n\nAs such, this solution was made. With this, I could retrieve the parade state of specific relevant personnels to show to our partner unit without leaking the parade state of other personnels. And all of this is done automatically, only requiring us to update the main Google Sheet.",
-        id: 3
-    }
-
-    const projectCard5: projectCard = {
-        bannerImageUrl: "url('/img/thumbnail_pcard/thumbnail_pcard_saver.png')",
-        video: { url: '/video/timestampsaverpromo.mp4', hasAudio: false },
-        title: "Chrome Extension: JunHua's YT Timestamp Saver",
-        description: "As a disclaimer, YouTube has since made it so when you return to the same video after having watched it before, it'll resume playing from where you left off. However, you need to be logged into an account, else the video will start from the beginning.\n\nWhen I made this extension it was before this update, and whenever I watched videos that were hours long, I remember having to write down the timestamp of where I stopped so I could continue later.\n\nThat's when I decided to take things into my own hand and challenged myself to make a solution with my programming knowledge. This was my first time learning the 'Chrome for Developers' API to create a Chrome Extension. The actual extension is very simple, with a click of the icon, the video timestamp is extracted and injected it into the URL, but it is with that simple click that made my life back then a lot easier which is one of the reasons why I enjoy programming so much.",
-        id: 4
-    }
-
-    // Array of all the project cards available, intended to hold any amount, fixed and will never change
-    const projectArray = [projectCard1, projectCard2, projectCard3, projectCard4, projectCard5];
 
     // Array of the project cards that will be displayed, intended to only hold 5 for desktop, and 1 for smaller views
     const [displayArray, setDisplayArray] = useState<displayObject[]>([]);
@@ -321,9 +323,46 @@ export default function MyProjects() {
             }
         }
 
+
+        const parentSection = mainVideoRef.current?.closest('section');
+        const observer = new MutationObserver(() => {
+            if (parentSection) {
+                if (parentSection.classList.contains('active')) {
+                    playVideos();
+                } else {
+                    pauseVideos();
+                }
+            }
+        });
+
+        if (parentSection) {
+            observer.observe(parentSection, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                pauseVideos();
+            } else if (document.visibilityState === 'visible') {
+                // Ensures the video isn't played when clicking back to the website while it's on other sections
+                if (carouselRef.current) {
+                    const parentSection = carouselRef.current.closest('section');
+                    if (parentSection && parentSection.classList.contains('active')) {
+                        playVideos();
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         return () => {
             // Clear displayArray on dismount to prevent multiple triggers from generating more than intended
             setDisplayArray([]);
+
+            observer.disconnect();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -339,6 +378,7 @@ export default function MyProjects() {
         if (showMore) {
             setShowMore(false);
         }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeCardsPassed.current])
 
@@ -382,11 +422,12 @@ export default function MyProjects() {
             <div className='projectMainDisplay'>
                 <div className='spacer-top'></div>
                 <div className='videoDisplay'>
-                    <video src={projectArray[activeCardId].video.url} className='mainPlayer' autoPlay muted playsInline loop></video>
+                    <video ref={mainVideoRef} src={projectArray[activeCardId].video.url} className='mainPlayer' muted loop onCanPlay={playVideos} onPause={pauseBgVideo} onPlay={playBgVideo}></video>
                 </div>
                 <div className='spacer-middle'></div>
                 {!notMinimized && (<div className='minimizedSection'>
                     <h1>{projectArray[activeCardId].title}</h1>
+                    {(projectArray[activeCardId].video.hasAudio && !notMinimized) && (<p>This video has audio: <span style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={toggleMuteVideo}>Click to toggle the audio</span></p>)}
                     <button className='minimizedButton' onClick={() => setShowMore(true)}>See Description</button>
                 </div>)}
                 <div className='spacer-bottom'></div>
@@ -395,9 +436,10 @@ export default function MyProjects() {
                     <IgnoreScroll>
                         <p style={{ whiteSpace: 'pre-line' }}>{projectArray[activeCardId].description}</p>
                     </IgnoreScroll>
-                    <p style={{ textDecoration: 'underline' }} onClick={() => setShowMore(false)}>Click to close description</p>
+                    {(projectArray[activeCardId].video.hasAudio && notMinimized) && (<p>This video has audio: <span style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={toggleMuteVideo}>Click to toggle the audio</span></p>)}
+                    {showMore && (<p style={{ textDecoration: 'underline' }} onClick={() => setShowMore(false)}>Click to close description</p>)}
                 </div>)}
-                <video src={projectArray[activeCardId].video.url} className='bgPlayer' autoPlay muted playsInline loop></video>
+                <video ref={bgVideoRef} src={projectArray[activeCardId].video.url} className='bgPlayer' muted loop></video>
             </div>
             <div className='carouselCover'>
                 <div className='inactiveCover'></div>

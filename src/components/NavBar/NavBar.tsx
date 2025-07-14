@@ -1,23 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import TextInputMovingLabel, { TIMLHandle } from '../TextInputMovingLabel/TextInputMovingLabel';
 import { useLogIn } from '../../context/LogInContext';
+import { useNav } from '../../context/NavigationContext';
 import './NavBar.css';
 
-type navIds = 'home' | 'about' | 'projects'
+export default function NavBar() {
 
-interface NavProps {
-    navigateRequest: (sectionId: navIds) => void
-    pauseScroll: (pause: boolean) => void
-}
-
-export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
+    const { navigateJumpTo, pauseScroll } = useNav();
 
     // Gets the id of a nav object to communicate with the site which section to scroll to
     const handleNavClick = (e: any) => {
 
         // Ensures that is from a navObject and not accidentally triggered by any unintended elements
         if (e.target.className === 'navObject') {
-            navigateRequest(e.target.id);
+            navigateJumpTo(e.target.id);
         }
 
     }
@@ -31,7 +27,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         if (middleNavRef.current && rightNavRef.current) {
             middleNavRef.current.classList.remove('middleNavMobileActive');
             rightNavRef.current.classList.remove('rightNavMobileActive');
-            pauseScroll(false);
+            pauseScroll.current = false;
         }
     }
 
@@ -43,14 +39,14 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
                 // For when the Hamburger Button is clicked while the menu is active
                 middleNavRef.current.classList.remove('middleNavMobileActive');
                 rightNavRef.current.classList.remove('rightNavMobileActive');
-                pauseScroll(false);
+                pauseScroll.current = false;
 
             } else {
 
                 // For when the Hamburger Button is clicked to show the menu
                 middleNavRef.current.classList.add('middleNavMobileActive');
                 rightNavRef.current.classList.add('rightNavMobileActive');
-                pauseScroll(true);
+                pauseScroll.current = true;
 
             }
         }
@@ -124,7 +120,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         if (signInPopupRef.current) {
             signInPopupRef.current.classList.remove('signInPopupInactive');
             signInPopupRef.current.classList.add('signInPopupActive');
-            pauseScroll(true);
+            pauseScroll.current = true;
         }
     }
 
@@ -136,7 +132,7 @@ export default function NavBar({ navigateRequest, pauseScroll }: NavProps) {
         if (signInPopupRef.current) {
             signInPopupRef.current.classList.remove('signInPopupActive');
             signInPopupRef.current.classList.add('signInPopupInactive');
-            pauseScroll(false);
+            pauseScroll.current = false;
         }
     }
 

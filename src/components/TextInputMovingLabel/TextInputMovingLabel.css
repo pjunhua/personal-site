@@ -1,41 +1,84 @@
-.timlDiv {
-    position: relative;
+.timl {
     margin-bottom: 5px;
 }
 
-.timlInput{
-    width: 100%;
+.timlDiv {
+    position: relative;
     border-radius: 1000px;
     height: 50px;
+    padding: 0 20px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+}
+
+.timlInput {
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
     border: none;
-    padding: 0px 20px;
+    padding: 0;
 }
 
 .timlInput:focus {
-    border: solid 2px green;
     outline: none;
+}
+
+.timlDiv:has(.timlInput:focus) {
+    border: solid 2px green;
+}
+
+.timlInput:not(:placeholder-shown)~.inputClearButton {
+    visibility: visible;
+}
+
+.inputClearButton {
+    visibility: hidden;
+    position: relative;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.inputClearButton::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 3px;
+    transform: rotate(45deg);
+    background-color: black;
+}
+
+.inputClearButton::after {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 3px;
+    transform: rotate(135deg);
+    background-color: black;
 }
 
 .timlLabel {
     position: absolute;
-    /* left is set equal to the left padding here */
-    left: 20px;
-    /* Set top to half of timlInput height, excluding any vertical margin/padding,
-       then translateY centers the text. */
-    top: 25px;
-    transform: translateY(-50%);
     font-size: 13px;
     opacity: 60%;
     transition: all 0.2s ease;
 }
 
-.timlInput:focus + label, .timlInput:not(:placeholder-shown) + label {
-    top: 10px;
+/* This targets the 'label' element directly after .timlInput is focused (clicked on). We then also repeat this but for when .timlInput 
+   has no placeholder shown, meaning there is text in the input. Without this, once .timlInput is clicked off and no longer focused, 
+   the label will drop back down rather than stay floating, then the label and input text will overlay one another. */
+.timlInput:focus+label,
+.timlInput:not(:placeholder-shown)+label {
+    left: 20px;
+    top: 2px;
     font-size: 10px;
 }
 
 .timlError {
-    margin: 0 20px 0 20px;
+    margin: 0 20px;
     color: red;
     font-size: 13px;
 }
