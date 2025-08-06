@@ -1,9 +1,12 @@
-import React, { createContext, useContext, useState, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 
 interface UserContextType {
-    accessToken: string;
-    setAccessToken: (accessToken: string)=>void;
-    loggedIn: React.RefObject<boolean>;
+    accessToken: React.RefObject<string>;
+    accountEmail: React.RefObject<string>;
+    loggedIn: boolean;
+    setLoggedIn: (loggedIn: boolean) => void;
+    tokenUpdates: () => void;
+    signOut: () => void;
 }
 
 /* Define createContext to be used, default is undefined until used by LogInProvider. Context is basically a way to share 
@@ -19,13 +22,72 @@ export const LogInProvider: React.FC<LogInProviderProps> = ({ children }) => {
 
     // useState/useRef that's shared with the other components
 
-    // Used to hold the access token, but also to trigger a re-render when set to indicate log in status
-    const [accessToken, setAccessToken] = useState<string>('');
+    const [loggedIn, setLoggedIn] = useState<boolean>(false);
+    const accessToken = useRef<string>('');
+    const accountEmail = useRef<string>('');
 
-    // This has to be useRef to check if we're logged in to then display/do things differently, the delay that comes with useState is too long
-    const loggedIn = useRef<boolean>(false);
+    // Invoked when updating an expired/missing Access Token, or to check if logged in, Refresh Token must exist and be valid
+    const tokenUpdates = async () => {
+        const res = await fetch(`${process.env.REACT_APP_BASE_URL}/tokenUpdates`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ accessTokenJwt: accessToken.current })
+        });
 
-    const value = { accessToken, setAccessToken, loggedIn };
+        if (!res.ok) {
+            console.error('Fetch failed:', res.status, res.statusText);
+            return;
+        }
+
+        const result = await res.json();
+
+        if (!result.validatePass) {
+            // Means no valid Refresh Token, which can only be created by logging in, set access token to blank to indicate logged out
+            accessToken.current = '';
+            accountEmail.current = '';
+            setLoggedIn(false);
+        } else {
+            // Means valid Refresh Token with valid Access Token
+            accessToken.current = result.value.accessToken;
+            accountEmail.current = result.value.email;
+            setLoggedIn(true);
+        }
+    }
+
+    const signOut = async () => {
+        const res = await fetch(`${process.env.REACT_APP_BASE_URL}/signOut`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+
+        if (!res.ok) {
+            console.error('Fetch failed:', res.status, res.statusText);
+            return;
+        } else {
+            accessToken.current = '';
+            accountEmail.current = ''
+            setLoggedIn(false);
+        }
+    }
+
+    // Verify log in status on boot
+    useEffect(() => {
+        const checkLoginStatus = async () => {
+            await tokenUpdates();
+        }
+
+        checkLoginStatus();
+
+        // eslint-disable-next-line
+    }, []);
+
+    const value = { accessToken, accountEmail, loggedIn, setLoggedIn, tokenUpdates, signOut };
 
     return (
         /* .Provider 'subscribes' LogInContext to components using LogInProvider, passing the context to LogInContext, making it no

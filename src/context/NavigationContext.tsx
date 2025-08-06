@@ -4,7 +4,8 @@ type NavRefsType = {
     home: React.RefObject<HTMLElement | null>,
     about: React.RefObject<HTMLElement | null>,
     projects: React.RefObject<HTMLElement | null>,
-    info: React.RefObject<HTMLElement | null>
+    info: React.RefObject<HTMLElement | null>,
+    contact: React.RefObject<HTMLElement | null>
 }
 
 interface NavContextType {
@@ -30,7 +31,8 @@ export const NavProvider: React.FC<NavProviderProps> = ({ children }) => {
         home: useRef<HTMLElement | null>(null),
         about: useRef<HTMLElement | null>(null),
         projects: useRef<HTMLElement | null>(null),
-        info: useRef<HTMLElement | null>(null)
+        info: useRef<HTMLElement | null>(null),
+        contact: useRef<HTMLElement | null>(null)
     }
 
     const navKeys: string[] = Object.keys(navRefs);
@@ -141,7 +143,7 @@ export const NavProvider: React.FC<NavProviderProps> = ({ children }) => {
         const handleTouchStart = (event: TouchEvent) => {
             if (pauseScroll.current) return;
             if (event.target instanceof Element) {
-                if (event.target.classList.contains('ignoreScroll')) {
+                if (event.target.closest('.ignoreScroll')) {
                     /* Need to set it to null as touchMove will still trigger based on the last touchPoint.
                        Example scenario is when you click on something but don't move. touchPoint will be set, but since
                        handleTouchMove wasn't triggered, it isn't reset to null. So now, even if you swipe on a target with
@@ -168,6 +170,11 @@ export const NavProvider: React.FC<NavProviderProps> = ({ children }) => {
                 let swipeEndPoint = event.touches[0].clientY;
 
                 if (event.target instanceof Element) {
+
+                    // Slight threshold setting so mobile users with gesture controls won't accidentally trigger the navigation
+                    const distance  = Math.abs(swipeEndPoint - touchPoint.current);
+                    if (distance < 50) return;
+
                     /* If swipeEndPoint is lower than touchPoint, it means the user swiped up, which in mobile orientation means the user is trying to
                        scroll down, so we follow the same logic as with the scroll listener. Conversely, if swipeEndPoint is higher than touchPoint, it
                        means the user swiped down to a lower point, which means they were trying to scroll up */
@@ -193,6 +200,7 @@ export const NavProvider: React.FC<NavProviderProps> = ({ children }) => {
         window.removeEventListener("touchstart", (event) => handleTouchStart(event));
         window.removeEventListener("touchmove", (event) => handleTouchMove(event));
         }
+        // eslint-disable-next-line
     }, [])
 
     const value = { navRefs, handleNavigate, navigateJumpTo, pauseScroll };

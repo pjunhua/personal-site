@@ -55,10 +55,10 @@ export default function NavBar() {
     /* == Sign In/Sign Up Related Declarations == */
 
     // If true, it means it should show Sign In, if false Sign Up, hence the name signInNotUp
-    const signInFormState = useRef<'SignIn' | 'SignUp' | 'ForgetPassword' | 'VerifyEmail' | 'Success'>('SignIn');
+    const [signInFormState, setSignInFormState] = useState<'SignIn' | 'SignUp' | 'ForgetPassword' | 'ResetPassword' | 'VerifyEmail' | 'SuccessSignIn' | 'SuccessSignUp' | 'SuccessResetPassword'>('SignIn');
 
-    const [signInHeaderText, setSignInHeaderText] = useState<'Sign In' | 'Sign Up' | 'Forget Password' | 'Verify Email Address' | 'Success'>('Sign In');
-    const [signInDescriptionText, setSignInDescriptionText] = useState<string>('Welcome back! Sign in to get access to features such as PLACEHOLDER!!!!!');
+    const [signInHeaderText, setSignInHeaderText] = useState<'Sign In' | 'Sign Up' | 'Forget Password' | 'Reset Password' | 'Verify Email Address' | 'Success'>('Sign In');
+    const [signInDescriptionText, setSignInDescriptionText] = useState<string>('Welcome back! Sign in to get access to features such as direct chat message and future game implementations!');
 
     const [passwordAutoComplete, setPasswordAutoComplete] = useState<'new-password' | 'current-password'>('current-password');
 
@@ -67,26 +67,12 @@ export default function NavBar() {
 
     const [signInPillText, setSignInPillText] = useState<'Sign In' | 'Sign Up' | 'Reset Password' | 'Confirm Verification Code'>('Sign In');
 
-    const { accessToken, setAccessToken, loggedIn } = useLogIn();
+    const { loggedIn, tokenUpdates, signOut } = useLogIn();
 
-    // Handles event based on form state when form is submitted
-    const toggleSignInOut = () => {
-        switch (signInFormState.current) {
-            // From Sign In or Verify Email (OTP), toggle to Sign Up form
+    // Change Sign In Form's text based on form state
+    useEffect(() => {
+        switch (signInFormState) {
             case 'SignIn':
-            case 'VerifyEmail':
-                signInFormState.current = 'SignUp';
-                setSignInHeaderText('Sign Up');
-                setSignInDescriptionText('New here? Welcome! Sign up to get access to features such as PLACEHOLDER!!!!!');
-                setPasswordAutoComplete('new-password');
-                setSignInPillText('Sign Up');
-                setTSIOPreText('Already have an account?');
-                setTSIOText('Sign In');
-                break;
-            // From Sign Up or Forget Password, toggle to Sign In form
-            case 'SignUp':
-            case 'ForgetPassword':
-                signInFormState.current = 'SignIn';
                 setSignInHeaderText('Sign In');
                 setSignInDescriptionText('Welcome back! Sign in to get access to features such as PLACEHOLDER!!!!!');
                 setPasswordAutoComplete('current-password');
@@ -94,18 +80,74 @@ export default function NavBar() {
                 setTSIOPreText("Don't have an account?");
                 setTSIOText('Sign Up');
                 break;
+            case 'SignUp':
+                setSignInHeaderText('Sign Up');
+                setSignInDescriptionText('New here? Welcome! Sign up to get access to features such as direct chat message and future game implementations!');
+                setPasswordAutoComplete('new-password');
+                setSignInPillText('Sign Up');
+                setTSIOPreText('Already have an account?');
+                setTSIOText('Sign In');
+                break;
+            case 'ForgetPassword':
+                setSignInDescriptionText('Forgot your password? No problem, enter the email you signed up with to get started on the recovery process!');
+                setSignInHeaderText('Forget Password');
+                setSignInPillText('Reset Password');
+                setTSIOPreText('Remembered your password?');
+                setTSIOText('Sign In');
+                break;
+            case 'ResetPassword':
+                setSignInHeaderText('Reset Password');
+                setSignInDescriptionText("A verification code has also been sent to your email, enter the code below, along with your new password, to verify it's you.");
+                setSignInPillText('Reset Password');
+                setTSIOPreText("Reset the password for another account?");
+                setTSIOText('Forget Password');
+                break;
+            case 'VerifyEmail':
+                setSignInHeaderText('Verify Email Address');
+                setSignInDescriptionText('A verification code has been sent to the email you signed up with, enter it below to finish creating your account!');
+                setSignInPillText('Confirm Verification Code');
+                setTSIOPreText('Want to change something?');
+                setTSIOText('Sign Up');
+                break;
+            case 'SuccessResetPassword':
+                setSignInHeaderText('Success');
+                setSignInDescriptionText("Your password has successfully been reset, and you've been logged in for your convenience! You may now close this window.");
+                break;
+            case 'SuccessSignIn':
+                setSignInHeaderText('Success');
+                setSignInDescriptionText('Welcome! You have successfully logged in, you may close this window now.');
+                break;
+            case 'SuccessSignUp':
+                setSignInHeaderText('Success');
+                setSignInDescriptionText('Welcome! Your account has been successfully created! You have been automatically logged in and may close this window now.');
+                break;
+        }
+    }, [signInFormState])
+
+    // Handles event based on form state when form is submitted
+    const toggleSignInOut = () => {
+        switch (signInFormState) {
+            // From Sign In or Verify Email (OTP), toggle to Sign Up form
+            case 'SignIn':
+            case 'VerifyEmail':
+                setSignInFormState('SignUp');
+                break;
+            // From Sign Up or Forget Password, toggle to Sign In form
+            case 'SignUp':
+            case 'ForgetPassword':
+                setSignInFormState('SignIn');
+                break;
+            // From Reset Password, toggle to Forget Password
+            case 'ResetPassword':
+                setSignInFormState('ForgetPassword');
+                break;
         }
     }
 
     const toggleSignInForgetPassword = () => {
         // From Sign In, toggle to Forget Password form
-        if (signInFormState.current === 'SignIn') {
-            signInFormState.current = 'ForgetPassword';
-            setSignInDescriptionText('Forgot your password? No problem, enter the email you signed up with to get started on the recovery process!');
-            setSignInHeaderText('Forget Password');
-            setSignInPillText('Reset Password');
-            setTSIOPreText('Remembered your password?');
-            setTSIOText('Sign In');
+        if (signInFormState === 'SignIn') {
+            setSignInFormState('ForgetPassword');
         }
     }
 
@@ -117,23 +159,24 @@ export default function NavBar() {
     }
 
     const handleSignInButtonClick = () => {
-        if (signInPopupRef.current) {
-            signInPopupRef.current.classList.remove('signInPopupInactive');
-            signInPopupRef.current.classList.add('signInPopupActive');
-            pauseScroll.current = true;
-        }
+        const sIPR = signInPopupRef.current;
+        if (!sIPR) throw new Error('Sign In Popup Ref not detected on sign in button click');
+        sIPR.classList.remove('signInPopupInactive');
+        sIPR.classList.add('signInPopupActive');
+        pauseScroll.current = true;
     }
 
-    const handleSignInMenuCloseClick = () => {
-        closeSignInPopup();
+    const handleSignOutButtonClick = async () => {
+        setSignInFormState('SignIn');
+        await signOut();
     }
 
     const closeSignInPopup = () => {
-        if (signInPopupRef.current) {
-            signInPopupRef.current.classList.remove('signInPopupActive');
-            signInPopupRef.current.classList.add('signInPopupInactive');
-            pauseScroll.current = false;
-        }
+        const sIPR = signInPopupRef.current;
+        if (!sIPR) throw new Error('Sign In Popup Ref not detected on close sign in popup');
+        sIPR.classList.remove('signInPopupActive');
+        sIPR.classList.add('signInPopupInactive');
+        pauseScroll.current = false;
     }
 
     const emailRef = useRef<TIMLHandle | null>(null);
@@ -149,7 +192,7 @@ export default function NavBar() {
         e.preventDefault();
 
         // Find out the current intent of the form, be it to sign in/sign up/verify email with code/reset password
-        const currentState = signInFormState.current;
+        const currentState = signInFormState;
 
         let eRef: TIMLHandle | null = null;
         let pRef: TIMLHandle | null = null;
@@ -173,21 +216,21 @@ export default function NavBar() {
             email = eRef.getInput();
         }
 
-        if (['SignIn', 'SignUp'].includes(currentState)) {
+        if (['SignIn', 'SignUp', 'ResetPassword'].includes(currentState)) {
             pRef = pwRef.current;
             if (!pRef) throw new Error('pwRef not detected at form submission');
 
             password = pRef.getInput();
         }
 
-        if (['SignUp'].includes(currentState)) {
+        if (['SignUp', 'ResetPassword'].includes(currentState)) {
             cRef = confirmPwRef.current;
             if (!cRef) throw new Error('confirmPwRef not detected at form submission');
 
             confirmPassword = cRef.getInput();
         }
 
-        if (['VerifyEmail'].includes(currentState)) {
+        if (['VerifyEmail', 'ResetPassword'].includes(currentState)) {
             vRef = verifyEmailRef.current;
             if (!vRef) throw new Error('verifyEmailRef not detected at form submission');
 
@@ -197,7 +240,7 @@ export default function NavBar() {
         type ValidateResult = {
             validatePass: boolean
             errorMessage: { email: string, password: string, confirmPassword: string, verifyEmail: string }
-            accessToken: string
+            value: { accessToken: string, email: string }
         }
 
         // Based on the result from fetch requests, assign the error message to their corresponding inputs
@@ -258,19 +301,85 @@ export default function NavBar() {
                     if (!result.validatePass) {
                         handleErrorDisplay(result);
                     } else {
-                        loggedIn.current = true;
-                        setAccessToken(result.accessToken);
-                        signInFormState.current = 'Success';
-                        setSignInHeaderText('Success');
-                        setSignInDescriptionText('Welcome! Your account has been successfully created! You have been automatically logged in and may close this window now.');
+                        await tokenUpdates();
+                        setSignInFormState('SuccessSignUp');
                     }
                 }
 
                 verifyVerificationCode();
             }
-        } else if (emailValidation() && passwordValidation()) {
+        }
 
-            if (currentState === 'SignIn') {
+        if (currentState === 'ForgetPassword') {
+            if (emailValidation()) {
+                const forgetPasswordFetch = async () => {
+                    try {
+                        const res = await fetch(`${process.env.REACT_APP_BASE_URL}/forgetPassword`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ email: email }),
+                        });
+
+                        if (!res.ok) {
+                            console.error('Fetch failed:', res.status, res.statusText);
+                            return;
+                        }
+
+                        const result = await res.json();
+
+                        // Only trigger error display when the validation is marked as fail
+                        if (!result.validatePass) {
+                            handleErrorDisplay(result);
+                        } else {
+                            setSignInFormState('ResetPassword');
+                            emailKey.current = email;
+                        }
+                    } catch (error) {
+                        console.error('Network error:', error);
+                    }
+                };
+
+                forgetPasswordFetch();
+            }
+        }
+
+        if (currentState === 'ResetPassword') {
+            if (passwordValidation() && confirmPasswordValidation() && verifyEmailValidation()) {
+
+                const resetPassword = async () => {
+                    const res = await fetch(`${process.env.REACT_APP_BASE_URL}/resetPassword`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ email: emailKey.current, password: password, confirmPassword: confirmPassword, codeInput: verifyEmail })
+                    });
+
+                    if (!res.ok) {
+                        console.error('Fetch failed:', res.status, res.statusText);
+                        return;
+                    }
+
+                    const result = await res.json();
+
+                    // Only trigger error display when the validation is marked as fail
+                    if (!result.validatePass) {
+                        handleErrorDisplay(result);
+                    } else {
+                        await tokenUpdates();
+                        setSignInFormState('SuccessResetPassword');
+                    }
+                }
+
+                resetPassword();
+            }
+        }
+
+        if (currentState === 'SignIn') {
+            if (emailValidation() && passwordValidation()) {
                 const signInFetch = async () => {
                     try {
                         const res = await fetch(`${process.env.REACT_APP_BASE_URL}/signIn`, {
@@ -292,11 +401,8 @@ export default function NavBar() {
                         if (!result.validatePass) {
                             handleErrorDisplay(result);
                         } else {
-                            loggedIn.current = true;
-                            setAccessToken(result.accessToken);
-                            signInFormState.current = 'Success';
-                            setSignInHeaderText('Success');
-                            setSignInDescriptionText('Welcome! You have successfully logged in, you may close this window now.');
+                            await tokenUpdates();
+                            setSignInFormState('SuccessSignIn');
                         }
                     } catch (error) {
                         console.error('Network error:', error);
@@ -304,8 +410,11 @@ export default function NavBar() {
                 };
 
                 signInFetch();
-            } else if (currentState === 'SignUp' && confirmPasswordValidation()) {
+            }
+        }
 
+        if (currentState === 'SignUp') {
+            if (emailValidation() && passwordValidation() && confirmPasswordValidation()) {
                 const signUpFetch = async () => {
                     try {
                         const res = await fetch(`${process.env.REACT_APP_BASE_URL}/signUp`, {
@@ -327,12 +436,7 @@ export default function NavBar() {
                         if (!result.validatePass) {
                             handleErrorDisplay(result);
                         } else {
-                            signInFormState.current = 'VerifyEmail';
-                            setSignInHeaderText('Verify Email Address');
-                            setSignInDescriptionText('A verification code has been sent to the email you signed up with, enter it below to finish creating your account!');
-                            setSignInPillText('Confirm Verification Code');
-                            setTSIOPreText('Want to change something?');
-                            setTSIOText('Sign Up');
+                            setSignInFormState('VerifyEmail');
                             emailKey.current = email;
                             passwordKey.current = password;
                         }
@@ -343,8 +447,8 @@ export default function NavBar() {
 
                 signUpFetch();
             }
-
         }
+
 
     }
 
@@ -450,7 +554,7 @@ export default function NavBar() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email: emailKey.current })
+                body: JSON.stringify({ email: emailKey.current, state: signInFormState })
             });
 
             if (!res.ok) {
@@ -467,43 +571,6 @@ export default function NavBar() {
         }
     }
 
-    // Invoked when updating an expired/missing Access Token, or to check if logged in, Refresh Token must exist and be valid
-    const tokenUpdates = async () => {
-        const res = await fetch(`${process.env.REACT_APP_BASE_URL}/tokenUpdates`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({ accessTokenJwt: accessToken })
-        });
-
-        if (!res.ok) {
-            console.error('Fetch failed:', res.status, res.statusText);
-            return;
-        }
-
-        const result = await res.json();
-
-        if (!result.validatePass) {
-            // Means no valid Refresh Token, which can only be created by logging in, set access token to blank to indicate logged out
-            loggedIn.current = false;
-            setAccessToken('');
-        } else {
-            // Means valid Refresh Token with valid Access Token
-            loggedIn.current = true;
-            setAccessToken(result.accessToken);
-        }
-    }
-
-    useEffect(() => {
-        const checkLoginStatus = async () => {
-            await tokenUpdates();
-        }
-
-        checkLoginStatus();
-    }, []);
-
     // useEffect to display the countdown timer live for resending verification code
     useEffect(() => {
         if (resendTimerText !== 0) {
@@ -519,7 +586,7 @@ export default function NavBar() {
             case 'password':
                 passwordValidation();
                 // Check if newly entered password matches any existing value in confirm password when signing up
-                if (signInFormState.current === 'SignUp') {
+                if (signInFormState === 'SignUp') {
                     confirmPasswordValidation();
                 }
                 break;
@@ -537,25 +604,21 @@ export default function NavBar() {
         <>
             <div className='signInPopup signInPopupInactive' ref={signInPopupRef} onClick={handleSignInPopupClick}>
                 <div className='signInMenu'>
-                    <div className='closeButton' onClick={handleSignInMenuCloseClick}>
+                    <div className='closeButton' onClick={closeSignInPopup}>
                         <div className='xIcon'></div>
                     </div>
                     <h1 className='signInHeaderText'>{signInHeaderText}</h1>
                     <p className='signInDescriptionText'>{signInDescriptionText}</p>
                     <form onSubmit={signInProcess}>
-                        {['SignIn', 'SignUp', 'ForgetPassword'].includes(signInFormState.current) && (<TextInputMovingLabel ref={emailRef} type='email' id='email' autoComplete='email' labelText='Email Address' validateInput={(id) => handleValidation(id)} />)}
-                        {['SignIn', 'SignUp'].includes(signInFormState.current) && (<TextInputMovingLabel ref={pwRef} type='password' id='password' autoComplete={passwordAutoComplete} labelText='Password' validateInput={(id) => handleValidation(id)} />)}
-                        {['SignUp'].includes(signInFormState.current) && (<TextInputMovingLabel ref={confirmPwRef} type='password' id='confirmPassword' autoComplete='off' labelText='Confirm Password' validateInput={(id) => handleValidation(id)} />)}
-                        {['VerifyEmail'].includes(signInFormState.current) && (<TextInputMovingLabel ref={verifyEmailRef} type='text' id='verifyEmail' autoComplete='off' labelText='Verification Code' validateInput={(id) => handleValidation(id)} />)}
-                        {['SignIn'].includes(signInFormState.current) && (<div className='rememberMe'>
-                            <input type='checkbox' id='rememberMeCheck'></input>
-                            <label htmlFor='rememberMeCheck'>Remember Me</label>
-                        </div>)}
-                        {['VerifyEmail'].includes(signInFormState.current) && (<p className={`clickableLink resendVerificationCodeText ${resendTimerText !== 0 ? 'disableResend' : ''}`} onClick={getNewVerificationCode}>Resend verification code {(resendTimerText !== 0 && (<span className='resendTimer'>in {resendTimerText}</span>))}</p>)}
-                        {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail'].includes(signInFormState.current) && (<button className='signInPill' type='submit'>{signInPillText}</button>)}
+                        {['SignIn', 'SignUp', 'ForgetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={emailRef} type='email' id='email' autoComplete='email' labelText='Email Address' validateInput={(id) => handleValidation(id)} />)}
+                        {['SignIn', 'SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={pwRef} type='password' id='password' autoComplete={passwordAutoComplete} labelText='Password' validateInput={(id) => handleValidation(id)} />)}
+                        {['SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={confirmPwRef} type='password' id='confirmPassword' autoComplete='off' labelText='Confirm Password' validateInput={(id) => handleValidation(id)} />)}
+                        {['VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={verifyEmailRef} type='text' id='verifyEmail' autoComplete='off' labelText='Verification Code' validateInput={(id) => handleValidation(id)} />)}
+                        {['VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<p className={`clickableLink resendVerificationCodeText ${resendTimerText !== 0 ? 'disableResend' : ''}`} onClick={getNewVerificationCode}>Resend verification code {(resendTimerText !== 0 && (<span className='resendTimer'>in {resendTimerText}</span>))}</p>)}
+                        {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<button className='signInPill' type='submit'>{signInPillText}</button>)}
                     </form>
-                    {['SignIn'].includes(signInFormState.current) && (<p className='clickableLink forgetPasswordText' onClick={toggleSignInForgetPassword}>Forgot your password?</p>)}
-                    {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail'].includes(signInFormState.current) && (<p className='toggleSignInOut'>{tSIOPreText} <span className='clickableLink' onClick={toggleSignInOut} style={{ whiteSpace: 'nowrap' }}>{tSIOText}</span></p>)}
+                    {['SignIn'].includes(signInFormState) && (<p className='clickableLink forgetPasswordText' onClick={toggleSignInForgetPassword}>Forgot your password?</p>)}
+                    {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<p className='toggleSignInOut'>{tSIOPreText} <span className='clickableLink' onClick={toggleSignInOut} style={{ whiteSpace: 'nowrap' }}>{tSIOText}</span></p>)}
                 </div>
             </div>
             <nav className='navbar'>
@@ -573,9 +636,7 @@ export default function NavBar() {
                     </ul>
                 </div>
                 <div className='rightNav' ref={rightNavRef}>
-                    {!loggedIn.current && (<div className='signInLogin' onClick={handleSignInButtonClick}>
-                        <button className='signInButton'>Sign In</button>
-                    </div>)}
+                    {loggedIn ? (<button className='signInOutButton signOutButton' onClick={handleSignOutButtonClick}>Sign Out</button>) : (<button className='signInOutButton signInButton' onClick={handleSignInButtonClick}>Sign In</button>)}
                     <div className='hamburgerButton' onClick={handleHamburgerClick}>
                         <div className='hamburgerIcon'></div>
                     </div>

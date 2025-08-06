@@ -2,9 +2,9 @@ import { forwardRef, useImperativeHandle, useState, useRef } from 'react'
 import './TextInputMovingLabel.css'
 
 interface timlProps {
-    type: string
+    type?: string
     id: string
-    autoComplete: string
+    autoComplete?: string
     labelText: string
     validateInput?: (id: string) => void
     liveUpdate?: (input: string) => void
@@ -21,7 +21,6 @@ const TextInputMovingLabel = forwardRef<TIMLHandle, timlProps>(({ type, id, auto
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [errorText, setErrorText] = useState<string>('');
-    const inputHasText = useRef<boolean>(false);
 
     const getInput = () => {
         if (!inputRef.current) throw new Error("inputRef not detected at get input");

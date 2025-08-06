@@ -5,7 +5,6 @@
     background-color: #ffb347;
     box-shadow: 0 0 12px 6px #ffb347;
     border-radius: 20px;
-    z-index: 20;
     bottom: 0%;
     animation: floatUp linear 7s forwards;
 }

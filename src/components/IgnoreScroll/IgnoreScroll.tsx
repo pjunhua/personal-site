@@ -1,10 +1,11 @@
-import { useEffect, useRef, isValidElement, cloneElement } from 'react';
+import { useEffect, useRef, useCallback, isValidElement, cloneElement } from 'react';
 
 type IgnoreScrollProps = {
-    children: React.ReactElement<React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>>
+    children: React.ReactElement<React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>>;
+    startFromBottom?: boolean;
 }
 
-export default function IgnoreScroll({ children }: IgnoreScrollProps) {
+export default function IgnoreScroll({ children, startFromBottom }: IgnoreScrollProps) {
 
     const ignoreRef = useRef<HTMLElement | null>(null);
 
@@ -44,8 +45,11 @@ export default function IgnoreScroll({ children }: IgnoreScrollProps) {
                 setTimeout(() => iR.classList.remove('ignoreNavUp'), 500);
             }
 
-            // scrollHeight - clientHeight gives the maximum scroll length, if scrollTop is equal to it, it means user has scrolled the full length to the very bottom and should be allowed to navigate down
-            if (Math.ceil(iR.scrollTop) === iR.scrollHeight - iR.clientHeight) {
+            /* scrollHeight - clientHeight gives the maximum scroll length, if scrollTop is equal to it, it means user has scrolled the full length to the very bottom and 
+               should be allowed to navigate down. I also had to make it >= rather than === because on mobile apparantly you can over scroll past the intended limit of
+               scrollHeight - clientHeight as the browsers allow you to pull further down. Tested this where scrolling up slightly would trigger this function meaning I 
+               had undone the over scroll. */
+            if (Math.ceil(iR.scrollTop) >= iR.scrollHeight - iR.clientHeight) {
                 // Timeout makes it so when user is scrolling down fast they don't accidentally trigger nav down
                 setTimeout(() => iR.classList.remove('ignoreNavDown'), 500);
             }
@@ -60,19 +64,38 @@ export default function IgnoreScroll({ children }: IgnoreScrollProps) {
             iR.removeEventListener('scroll', handleScroll);
         }
 
-    }, []);
+    }, [children]);
+
+    /* A react component can only hold 1 ref, so if 'children' has a ref and we assign a ref in IgnoreScroll, it'll override 'children''s ref.
+       Thus instead, by assigning the function setCombinedRef as the sole ref, we can within it assign the child node to both IgnoreScroll's
+       useRef object, and the child's original ref object.  */
+    const setCombinedRef = useCallback((node: HTMLElement) => {
+        // Pass the child node to IgnoreScroll's useRef for usage within IgnoreScroll
+        ignoreRef.current = node;
+
+        // Ensures that the child has a ref of its own so we can pass its own node to it
+        if (children && 'ref' in children) {
+            const originalRef = children.ref;
+            if (typeof originalRef === 'function') {
+                // If a function is passed into the child's ref, execute it on its behalf
+                originalRef(node);
+            } else if (originalRef && typeof originalRef === 'object') {
+                // If a useRef is passed into the child's ref, pass the node ot it on its behalf
+                (originalRef as React.RefObject<HTMLElement>).current = node;
+            }
+        }
+    }, [children]);
 
     if (isValidElement(children)) {
         return (
             <>
                 {cloneElement(children, {
-                    ref: ignoreRef,
+                    ...children.props,
+                    ref: setCombinedRef,
                     style: {
                         ...children.props.style,
-                        overflowY: 'auto',
-                        scrollbarGutter: 'stable'
-                    },
-                    className: `${children.props.className ?? ''} ignoreScroll`
+                        overflowY: 'auto'
+                    }
                 })}
             </>
         )

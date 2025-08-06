@@ -1,0 +1,204 @@
+.chatWindow {
+    background-color: #f6f1e6;
+    width: 700px;
+    height: 700px;
+    max-height: calc(100% - 200px);
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.messageList {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.messageListItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.messageListItem:hover {
+    background-color: #bfbcb6;
+}
+
+.messageListItemDivider {
+    height: 2px;
+    width: 100%;
+    background-color: #bfbcb6;
+}
+
+.messageListItemTexts {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    max-width: calc(100% - 50px);
+    padding: 0 10px;
+}
+
+.mLITUser {
+    margin: 0;
+    font-family: 'Rubik';
+    font-size: 20px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.mLITMessage {
+    margin: 0;
+    font-family: 'Rubik';
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.mLITTime {
+    margin: 0;
+    font-family: 'Rubik';
+    white-space: nowrap;
+}
+
+.messageBox {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    height: calc(100%-50px);
+}
+
+.dateLineBreak {
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    min-height: 20px;
+}
+
+.dateLine {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #ED9121;
+}
+
+.dateLineText {
+    color: #ED9121;
+    font-family: 'Rubik';
+    margin: 0 5px;
+}
+
+.messageObject {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.profileImage {
+    width: 50px;
+    min-width: 50px;
+    height: 50px;
+    border-radius: 100px;
+    background-size: cover;
+}
+
+.message {
+    max-width: 500px;
+    min-height: 50px;
+    padding: 10px;
+    border-radius: 5px;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 10px;
+}
+
+.messageText {
+    margin: 0;
+    white-space: pre-line;
+    font-family: 'Rubik';
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.messageTime {
+    margin: 0;
+    font-family: 'Rubik';
+    font-size: 12px;
+    position: relative;
+    display: flex;
+    align-items: end;
+    margin-left: auto;
+}
+
+.chatFooter {
+    display: flex;
+    align-items: end;
+}
+
+.messageSendBtn {
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 100px;
+    padding: 0;
+    background-color: #2ECC71;
+    margin-left: 5px;
+    flex-shrink: 0;
+}
+
+.arrow {
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 5px;
+}
+
+.arrow.right {
+    transform: rotate(-45deg) translate(-25%, -25%);
+}
+
+.messageObject.left {
+    justify-content: start;
+}
+
+.left .message {
+    background-color: #bddfb5;
+}
+
+.messageObject.right {
+    justify-content: end;
+}
+
+.right .message {
+    background-color: #d6d3cd;
+}
+
+.messageTextBox {
+    background-color: white;
+    width: 100%;
+    padding: 0 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.messageTextArea {
+    all: unset;
+    font-family: 'Rubik';
+    width: 100%;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}

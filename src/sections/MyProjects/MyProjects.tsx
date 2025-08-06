@@ -3,6 +3,7 @@ import { motion, useMotionValue, useMotionValueEvent, wrap, useAnimationControls
 import './MyProjects.css';
 import IgnoreScroll from '../../components/IgnoreScroll/IgnoreScroll';
 import { projectCard, projectArray } from './ProjectCardData';
+import LinkInP from '../../components/LinkInP/LinkInP';
 
 export default function MyProjects() {
 
@@ -20,7 +21,7 @@ export default function MyProjects() {
     }
 
     // For when the main video is paused via media buttons, the bgVideo will keep playing otherwise
-    const pauseBgVideo =()=> {
+    const pauseBgVideo = () => {
         const bVR = bgVideoRef.current;
         if (bVR) {
             bVR.pause();
@@ -39,9 +40,9 @@ export default function MyProjects() {
     }
 
     // For when the main video has resumed playing via media buttons, the bgVideo will remain paused otherwise
-    const playBgVideo =()=> {
+    const playBgVideo = () => {
         const bVR = bgVideoRef.current;
-        if (bVR) {
+        if (bVR && bVR.paused) {
             bVR.play();
         }
     }
@@ -417,24 +418,54 @@ export default function MyProjects() {
     const [notMinimized, setNotMinimized] = useState<boolean>(true);
     const [showMore, setShowMore] = useState<boolean>(false);
 
+    const posterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Whenever the active video src changes, set a timer to display a placeholder poster so it isn't just a confusing long blank screen if the video takes a long time to load
+    useEffect(() => {
+        const mVR = mainVideoRef.current;
+        if (mVR) {
+            // Clears any ongoing timeout so the following one will be the only one and there won't be any conflicts
+            if (posterTimeoutRef.current) {
+                clearTimeout(posterTimeoutRef.current);
+            }
+
+            /* The reason why we're setting up a timeout and clearing the poster before each time is so during the short interval it takes for the video to load when moving to the next, 
+               it won't flashbang users with the image. So rather than video -> image -> video in a span of like 1 second, video -> blank -> video is more soothing to the eyes. */
+            mVR.poster = '';
+            posterTimeoutRef.current = setTimeout(() => mVR.poster = '/img/video_loading_placeholder_poster.png', 3000);
+        }
+    }, [activeCardId]);
+
+    /* When there's an error loading the video, usually when the video url doesn't point to any existing video. Rather than displaying the same loading palceholder and keeping users
+       waiting, thinking it'll eventually load. Replace it with the missing placeholder to let them know to move on, while also helping with troubleshooting on the dev side. */
+    const mainVideoOnError = () => {
+        const mVR = mainVideoRef.current;
+        if (posterTimeoutRef.current && mVR) {
+            // Clear any timeouts so it won't suddenly jump from missing placeholder to the loading placeholder that was previously queued
+            clearTimeout(posterTimeoutRef.current);
+            mVR.poster = '/img/video_missing_placeholder_poster.png';
+        }
+    }
+
     return (
         <>
             <div className='projectMainDisplay'>
                 <div className='spacer-top'></div>
                 <div className='videoDisplay'>
-                    <video ref={mainVideoRef} src={projectArray[activeCardId].video.url} className='mainPlayer' muted loop onCanPlay={playVideos} onPause={pauseBgVideo} onPlay={playBgVideo}></video>
+                    <video ref={mainVideoRef} src={projectArray[activeCardId].video.url} className='mainPlayer' muted loop onCanPlay={playVideos} onPause={pauseBgVideo} poster='/img/video_loading_placeholder_poster.png' onPlay={playBgVideo} onError={mainVideoOnError}></video>
                 </div>
                 <div className='spacer-middle'></div>
                 {!notMinimized && (<div className='minimizedSection'>
                     <h1>{projectArray[activeCardId].title}</h1>
-                    {(projectArray[activeCardId].video.hasAudio && !notMinimized) && (<p>This video has audio: <span style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={toggleMuteVideo}>Click to toggle the audio</span></p>)}
+                    {(projectArray[activeCardId].video.hasAudio && !notMinimized) && (<p>This video has audio: <span style={{ textDecoration: 'underline', cursor: 'pointer', userSelect: 'none' }} onClick={toggleMuteVideo}>Click to toggle the audio</span></p>)}
                     <button className='minimizedButton' onClick={() => setShowMore(true)}>See Description</button>
                 </div>)}
                 <div className='spacer-bottom'></div>
                 {(notMinimized || showMore) && (<div className='infoWindow'>
                     <h1>{projectArray[activeCardId].title}</h1>
                     <IgnoreScroll>
-                        <p style={{ whiteSpace: 'pre-line' }}>{projectArray[activeCardId].description}</p>
+                        <LinkInP textPara={projectArray[activeCardId].description} className={'projectDescription'} />
+                        {/* <p style={{ whiteSpace: 'pre-line' }}>{projectArray[activeCardId].description}</p> */}
                     </IgnoreScroll>
                     {(projectArray[activeCardId].video.hasAudio && notMinimized) && (<p>This video has audio: <span style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={toggleMuteVideo}>Click to toggle the audio</span></p>)}
                     {showMore && (<p style={{ textDecoration: 'underline' }} onClick={() => setShowMore(false)}>Click to close description</p>)}

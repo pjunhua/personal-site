@@ -1,0 +1,32 @@
+.contactContainer {
+    position: relative;
+    z-index: 2;
+    max-width: 90%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 50px;
+}
+
+.contactTexts {
+    width: 500px;
+}
+
+.contactTexts>h1,
+.contactTexts>p {
+    color: #f6f1e6;
+    font-family: 'Rubik';
+}
+
+.contactTexts a {
+    color: #7dcfff;
+}
+
+@media (max-width: 767px) {
+    .contactContainer {
+        flex-wrap: wrap;
+        max-height: calc(100% - 200px);
+    max-width: 90%;
+    }
+}

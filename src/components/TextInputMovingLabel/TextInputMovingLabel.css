@@ -1,5 +1,6 @@
 .timl {
-    margin-bottom: 5px;
+    margin: 5px 0px;
+    flex-grow: 1;
 }
 
 .timlDiv {

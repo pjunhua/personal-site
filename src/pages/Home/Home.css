@@ -17,7 +17,7 @@ section {
     transform: translateY(-100%);
 }
 
-.hero-welcome-screen {
+.heroWelcomeScreen {
     background: linear-gradient(45deg, #b8875b, #d6ae7b, #cbb092, #bb8f76);
     background-size: 400% 400%;
     position: relative;
@@ -28,26 +28,126 @@ section {
     animation: gradient 10s infinite;
 }
 
-.about-me {
+.aboutMe {
     background: linear-gradient(to bottom, #050517 0%, #0b0f2a 40%, #131a3a 100%);
     position: absolute;
     top: 0%;
     z-index: 4;
 }
 
-.my-projects {
+.myProjects {
     position: absolute;
     top: 0%;
     z-index: 3;
 }
 
-.website-info {
-    background: gray;
+.websiteInfo {
     position: absolute;
     top: 0%;
     z-index: 2;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform-origin: bottom center;
+}
+
+.websiteInfo.sectionUp {
+    transform: rotate(180deg);
+}
+
+.overlay {
+    position: absolute;
+    z-index: 1;
+    width: 600%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 30%);
+}
+
+.sunBg {
+    width: 600%;
+    height: 150%;
+    position: absolute;
+    z-index: -1;
+    top: -50%;
+    left: -250%;
+    display: flex;
+    flex-direction: column;
     justify-content: end;
     align-items: center;
+    background: linear-gradient(to bottom, #4B1D06, #B84A00, #FF7E29);
+}
+
+.sunContainer {
+    width: 100%;
+    height: calc(100%/3*2);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.sun {
+    position: absolute;
+    bottom: -50%;
+    width: 1000px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFD700 40%, #FFA500 100%);
+    box-shadow:
+        0 0 30px 10px rgba(255, 215, 0, 0.6),
+        0 0 60px 20px rgba(255, 165, 0, 0.4),
+        0 0 100px 40px rgba(255, 140, 0, 0.2);
+}
+
+.contact {
+    position: absolute;
+    top: 0%;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(180deg);
+    transform-origin: bottom center;
+}
+
+.contact.active {
+    transform: rotate(360deg);
+}
+
+.moonBg {
+    width: 600%;
+    height: 150%;
+    position: absolute;
+    z-index: -1;
+    top: -50%;
+    left: -250%;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    background: linear-gradient(to bottom, #0b0c2a, #1a1a40, #2c3e50);
+}
+
+.moonContainer {
+    width: 100%;
+    height: calc(100%/3*2);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.moon {
+    position: absolute;
+    bottom: -50%;
+    width: 1000px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: radial-gradient(circle, #e0e0e0 40%, #a9a9a9 100%);
+    box-shadow:
+        0 0 20px 6px rgba(180, 200, 255, 0.2),
+        0 0 40px 12px rgba(200, 220, 255, 0.15),
+        0 0 60px 25px rgba(230, 240, 255, 0.1);
 }

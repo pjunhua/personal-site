@@ -18,7 +18,7 @@ export const projectArray:projectCard[] = [
         bannerImageUrl: "url('/img/thumbnail_pcard/thumbnail_pcard_custompc.png')",
         video: { url: '/video/neocities.mp4', hasAudio: false },
         title: "My First Website: LBGz's Custom PC Services",
-        description: "I made this for one of my first-year modules in Singapore Polytechnic, and it was my first ever website created since I started learning programming. It is by no means good or functional, but, it's nice to look back on it and see how much has changed since I first started.\n\nYou can visit it yourself by going to wryyy.neocities.org as shown in the video.",
+        description: "I made this for one of my first-year modules in Singapore Polytechnic, and it was my first ever website created since I started learning programming. It is by no means good or functional, but, it's nice to look back on it and see how much has changed since I first started.\n\nYou can visit it yourself by going to ||wryyy.neocities.org^^https://wryyy.neocities.org||.",
         id: 1
     }, 
     {

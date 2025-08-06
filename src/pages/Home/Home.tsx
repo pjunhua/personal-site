@@ -1,10 +1,12 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import './Home.css';
 import NavBar from '../../components/NavBar/NavBar';
+import FloatingClouds from '../../components/FloatingClouds/FloatingClouds';
 import AboutMe from '../../sections/AboutMe/AboutMe';
 import HeroWelcome from '../../sections/HeroWelcome/HeroWelcome';
 import MyProjects from '../../sections/MyProjects/MyProjects';
 import WebsiteInfo from '../../sections/WebsiteInfo/WebsiteInfo';
+import Contact from '../../sections/Contact/Contact';
 import { useNav } from '../../context/NavigationContext';
 
 export default function Home() {
@@ -22,17 +24,34 @@ export default function Home() {
     return (
         <>
             <NavBar />
-            <section className='hero-welcome-screen' ref={navRefs.home}>
+            <section className='heroWelcomeScreen' ref={navRefs.home}>
                 <HeroWelcome key={projectKey} />
             </section>
-            <section className='about-me' id='about-me' ref={navRefs.about}>
+            <section className='aboutMe' ref={navRefs.about}>
                 <AboutMe key={projectKey} />
             </section>
-            <section className='my-projects' id='my-projects' ref={navRefs.projects}>
+            <section className='myProjects' ref={navRefs.projects}>
                 <MyProjects key={projectKey} />
             </section>
-            <section className='website-info' id='website-info' ref={navRefs.info}>
+            <section className='websiteInfo' ref={navRefs.info}>
                 <WebsiteInfo key={projectKey} />
+                <div className='overlay'></div>
+                <FloatingClouds />
+                <div className='sunBg'>
+                    <div className='sunContainer'>
+                        <div className='sun'></div>
+                    </div>
+                </div>
+            </section>
+            <section className='contact' ref={navRefs.contact}>
+                <Contact key={projectKey} />
+                <div className='overlay'></div>
+                <FloatingClouds />
+                <div className='moonBg'>
+                    <div className='moonContainer'>
+                        <div className='moon'></div>
+                    </div>
+                </div>
             </section>
         </>
     )

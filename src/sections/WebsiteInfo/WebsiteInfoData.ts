@@ -22,7 +22,7 @@ export const infoArray: infoBubble[] = [
     },
     {
         title: 'Front-End Hosting',
-        description: "All my front-end code is stored in GitHub and hosted via GitHub pages, and it's ran under a custom domain I got off of Namecheap. You can view my public GitHub via https://github.com/pjunhua/personal-site if you're interested.",
+        description: "All my front-end code is stored in GitHub and hosted via GitHub pages, and it's ran under a custom domain I got off of Namecheap. You can view my public ||GitHub^^https://github.com/pjunhua/personal-site|| if you're interested.",
         tags: ['frontend', 'hosting', 'githubpages', 'domain', 'namecheap']
     },
     {
@@ -56,8 +56,18 @@ export const infoArray: infoBubble[] = [
         tags: ['infiniteloopingcarousel', 'myprojects', 'framermotion', 'animation']
     },
     {
+        title: 'CDN Hosted Videos',
+        description: "For the videos in the 'My Projects' section, rather than hosting it myself and causing long load times, I'm using Cloudflare's CDN to cache it.",
+        tags: ['cdn', 'hosting', 'cloudflare', 'myprojects']
+    },
+    {
         title: 'Live Filtering Search Bar',
         description: "This is the search bar in this very page! Whenever you type something, it immediately filters to only show those that are relevant based on the tags. You can also click on a tag to use it as the new search term for convenience.",
         tags: ['filter', 'search', 'websiteinfo', 'tags']
+    },
+    {
+        title: 'Live Chat Message',
+        description: "In the 'Contact' section, there's a chat window where we can message each other and it actually works live! It's powered by WebSocket, allowing live updates whenever one of us messages, rather than having to reload or having to ping the database in intervals to check if there's new messages.",
+        tags: ['livechat', 'websocket', 'message', 'contact']
     }
 ]

@@ -5,7 +5,7 @@ import './HeroWelcome.css';
 export default function HeroWelcome() {
 
     // LogInContext to determine if user is logged in or not
-    const { loggedIn } = useLogIn();
+    const { accessToken } = useLogIn();
 
     // Used when displaying messages at home screen, if not logged in and first time viewing message, show default, otherwise show time based messages
     const firstMessage = useRef<boolean>(true);
@@ -50,9 +50,8 @@ export default function HeroWelcome() {
     const abortTyping = useRef<boolean>(false);
 
     const getHeroMessage = () => {
-
         // If not logged in and first time seeing message, show default
-        if (!loggedIn.current && firstMessage.current) {
+        if (accessToken.current === '' && firstMessage.current) {
 
             // Ensures no messages are currently in the midst of typing when this is triggered
             if (!isTyping.current) {

@@ -1,14 +1,17 @@
-.websiteInfo {
-    height: 90%;
+.websiteInfoContainer {
+    height: 85%;
     max-width: 90%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 .infoExplanationText {
     color: #f6f1e6;
     font-family: 'Rubik';
+    text-align: center;
 }
 
 .searchBar {

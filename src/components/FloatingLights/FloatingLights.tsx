@@ -71,12 +71,12 @@ export default function FloatingLights() {
     }, [])
 
     return (
-        <>
+        <div className='lightContainer'>
             {
                 lightArray.map((light) => (
                     <div key={light.id} className='light' style={{ left: `${light.axis}%` }} onAnimationEnd={() => handleAnimationEnd(light.id)}></div>
                 ))
             }
-        </>
+        </div>
     )
 }
