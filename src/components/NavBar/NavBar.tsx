@@ -74,7 +74,7 @@ export default function NavBar() {
         switch (signInFormState) {
             case 'SignIn':
                 setSignInHeaderText('Sign In');
-                setSignInDescriptionText('Welcome back! Sign in to get access to features such as PLACEHOLDER!!!!!');
+                setSignInDescriptionText('Welcome back! Sign in to get access to features such as direct chat message and future game implementations!');
                 setPasswordAutoComplete('current-password');
                 setSignInPillText('Sign In');
                 setTSIOPreText("Don't have an account?");
