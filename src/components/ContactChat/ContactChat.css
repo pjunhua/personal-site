@@ -3,6 +3,7 @@
     width: 700px;
     height: 700px;
     max-height: calc(100% - 200px);
+    max-width: 100%;
     padding: 20px 10px;
     display: flex;
     flex-direction: column;
@@ -67,10 +68,8 @@
 
 .messageBox {
     flex-grow: 1;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    height: calc(100%-50px);
 }
 
 .dateLineBreak {
