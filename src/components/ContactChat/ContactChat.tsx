@@ -64,7 +64,7 @@ export default function ContactChat() {
             sender: 'Jun Hua',
             message: "Hey there! 👋 How may I help you?\n\nPlease note that you need to have an account on this website, and be logged in, if you want to send a message here!",
             direction: 'incoming',
-            profileImageUrl: '/img/transparent_profile.png',
+            profileImageUrl: `${process.env.REACT_APP_BASE_CDN_URL}/img/transparent_profile.png`,
             createdAt: ''
         }]);
 
@@ -101,7 +101,7 @@ export default function ContactChat() {
                                 sender: sent_by === process.env.REACT_APP_DEFAULT_CHAT_EMAIL ? 'Jun Hua' : sent_by,
                                 message: message_content,
                                 direction: sent_by === email ? 'outgoing' : 'incoming',
-                                profileImageUrl: sent_by === process.env.REACT_APP_DEFAULT_CHAT_EMAIL ? '/img/transparent_profile.png' : profile_image_url,
+                                profileImageUrl: sent_by === process.env.REACT_APP_DEFAULT_CHAT_EMAIL ? `${process.env.REACT_APP_BASE_CDN_URL}/img/transparent_profile.png` : profile_image_url,
                                 createdAt: created_at
                             });
                             return array;
@@ -251,7 +251,7 @@ export default function ContactChat() {
                         return <>
                             {index > 0 && (<div className='messageListItemDivider'></div>)}
                             <div className='messageListItem' onClick={() => openSoloChat(message.otherUser)}>
-                                <div className='profileImage' style={{ backgroundImage: `url(${message.profileImageUrl ?? '/img/default_profile.png'})` }}></div>
+                                <div className='profileImage' style={{ backgroundImage: `url(${message.profileImageUrl ?? `${process.env.REACT_APP_BASE_CDN_URL}/img/default_profile.png`})` }}></div>
                                 <div className='messageListItemTexts'>
                                     <h2 className='mLITUser'>{message.otherUser}</h2>
                                     <p className='mLITMessage'>{message.messageContent}</p>
@@ -301,7 +301,7 @@ export default function ContactChat() {
                                         <div className='dateLine'></div>
                                     </div>)}
                                     <div className={`messageObject ${ownMessage ? 'right' : 'left'}`}>
-                                        {!ownMessage && (<div className='profileImage' style={{ backgroundImage: `url(${message.profileImageUrl ?? '/img/default_profile.png'})` }}></div>)}
+                                        {!ownMessage && (<div className='profileImage' style={{ backgroundImage: `url(${message.profileImageUrl ?? `${process.env.REACT_APP_BASE_CDN_URL}/img/default_profile.png`})` }}></div>)}
                                         <div className='message'>
                                             <p className='messageText'>
                                                 {!ownMessage && (<span style={{ fontWeight: 'bold' }}>{message.sender}<br /><br /></span>)}

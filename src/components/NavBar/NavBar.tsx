@@ -624,7 +624,7 @@ export default function NavBar() {
             <nav className='navbar'>
                 <div className='leftNav'>
                     <div className='nameLogo' onClick={handleNavClick}>
-                        <img className='navObject' id='home' src='/img/name_logo.png' alt='JUN HUA' style={{ padding: '20px' }} />
+                        <img className='navObject' id='home' src={`${process.env.REACT_APP_BASE_CDN_URL}/img/name_logo.png`} alt='JUN HUA' style={{ padding: '20px' }} />
                     </div>
                 </div>
                 <div className='middleNav' ref={middleNavRef} onClick={handleMiddleNavClick}>

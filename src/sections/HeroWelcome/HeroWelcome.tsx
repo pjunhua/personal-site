@@ -214,7 +214,7 @@ export default function HeroWelcome() {
                 <div className={`hero-next-blinker ${startMsgBoxAnimation ? 'open-hero-next-blinker' : ''}`}></div>
                 <p className='hero-message'>{selectedMessage}</p>
             </div>
-            <img className='hero-image' src='/img/transparent_profile.png' alt='Profile Shot of Jun Hua' />
+            <img className='hero-image' src={`${process.env.REACT_APP_BASE_CDN_URL}/img/transparent_profile.png`} alt='Profile Shot of Jun Hua' />
         </>
     )
 }

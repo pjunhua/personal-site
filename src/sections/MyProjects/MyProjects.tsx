@@ -432,7 +432,7 @@ export default function MyProjects() {
             /* The reason why we're setting up a timeout and clearing the poster before each time is so during the short interval it takes for the video to load when moving to the next, 
                it won't flashbang users with the image. So rather than video -> image -> video in a span of like 1 second, video -> blank -> video is more soothing to the eyes. */
             mVR.poster = '';
-            posterTimeoutRef.current = setTimeout(() => mVR.poster = '/img/video_loading_placeholder_poster.png', 3000);
+            posterTimeoutRef.current = setTimeout(() => mVR.poster = `${process.env.REACT_APP_BASE_CDN_URL}/img/video_loading_placeholder_poster.png`, 3000);
         }
     }, [activeCardId]);
 
@@ -443,7 +443,7 @@ export default function MyProjects() {
         if (posterTimeoutRef.current && mVR) {
             // Clear any timeouts so it won't suddenly jump from missing placeholder to the loading placeholder that was previously queued
             clearTimeout(posterTimeoutRef.current);
-            mVR.poster = '/img/video_missing_placeholder_poster.png';
+            mVR.poster = `${process.env.REACT_APP_BASE_CDN_URL}/img/video_missing_placeholder_poster.png`;
         }
     }
 
@@ -452,7 +452,7 @@ export default function MyProjects() {
             <div className='projectMainDisplay'>
                 <div className='spacer-top'></div>
                 <div className='videoDisplay'>
-                    <video ref={mainVideoRef} src={projectArray[activeCardId].video.url} className='mainPlayer' muted loop onCanPlay={playVideos} onPause={pauseBgVideo} poster='/img/video_loading_placeholder_poster.png' onPlay={playBgVideo} onError={mainVideoOnError}></video>
+                    <video ref={mainVideoRef} src={projectArray[activeCardId].video.url} className='mainPlayer' muted loop onCanPlay={playVideos} onPause={pauseBgVideo} onPlay={playBgVideo} onError={mainVideoOnError}></video>
                 </div>
                 <div className='spacer-middle'></div>
                 {!notMinimized && (<div className='minimizedSection'>
@@ -465,7 +465,6 @@ export default function MyProjects() {
                     <h1>{projectArray[activeCardId].title}</h1>
                     <IgnoreScroll>
                         <LinkInP textPara={projectArray[activeCardId].description} className={'projectDescription'} />
-                        {/* <p style={{ whiteSpace: 'pre-line' }}>{projectArray[activeCardId].description}</p> */}
                     </IgnoreScroll>
                     {(projectArray[activeCardId].video.hasAudio && notMinimized) && (<p>This video has audio: <span style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={toggleMuteVideo}>Click to toggle the audio</span></p>)}
                     {showMore && (<p style={{ textDecoration: 'underline' }} onClick={() => setShowMore(false)}>Click to close description</p>)}
