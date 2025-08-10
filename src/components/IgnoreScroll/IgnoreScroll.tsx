@@ -2,10 +2,9 @@ import { useEffect, useRef, useCallback, isValidElement, cloneElement } from 're
 
 type IgnoreScrollProps = {
     children: React.ReactElement<React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>>;
-    startFromBottom?: boolean;
 }
 
-export default function IgnoreScroll({ children, startFromBottom }: IgnoreScrollProps) {
+export default function IgnoreScroll({ children }: IgnoreScrollProps) {
 
     const ignoreRef = useRef<HTMLElement | null>(null);
 
@@ -16,6 +15,8 @@ export default function IgnoreScroll({ children, startFromBottom }: IgnoreScroll
         // If they're equal it means there's no scroll in this screen resolution, so we shouldn't block the navigation
         if (iR.scrollHeight === iR.clientHeight) {
             iR.classList.remove('ignoreScroll');
+            iR.classList.remove('ignoreNavUp');
+            iR.classList.remove('ignoreNavDown');
             return;
         }
 
