@@ -172,7 +172,7 @@ export const NavProvider: React.FC<NavProviderProps> = ({ children }) => {
                 if (event.target instanceof Element) {
 
                     // Slight threshold setting so mobile users with gesture controls won't accidentally trigger the navigation
-                    const distance  = Math.abs(swipeEndPoint - touchPoint.current);
+                    const distance = Math.abs(swipeEndPoint - touchPoint.current);
                     if (distance < 50) return;
 
                     /* If swipeEndPoint is lower than touchPoint, it means the user swiped up, which in mobile orientation means the user is trying to
@@ -195,10 +195,23 @@ export const NavProvider: React.FC<NavProviderProps> = ({ children }) => {
 
         window.addEventListener("touchmove", (event) => handleTouchMove(event));
 
-        return()=>{
-        window.removeEventListener('wheel', (event) => wheelHandler(event));
-        window.removeEventListener("touchstart", (event) => handleTouchStart(event));
-        window.removeEventListener("touchmove", (event) => handleTouchMove(event));
+        // Allows for navigation with links like poonjunhua.com#about, intended for Google SEO use
+        const handleHashNavigate = () => {
+            if (window.location.hash) {
+                const section = window.location.hash.substring(1);
+                if (section in navRefs) navigateJumpTo(section as keyof typeof navRefs);
+            }
+        }
+
+        // Initial trigger in case user is entering with the # in the link already rather than adding it after
+        handleHashNavigate();
+        window.addEventListener("hashchange", () => handleHashNavigate());
+
+        return () => {
+            window.removeEventListener('wheel', (event) => wheelHandler(event));
+            window.removeEventListener("touchstart", (event) => handleTouchStart(event));
+            window.removeEventListener("touchmove", (event) => handleTouchMove(event));
+            window.removeEventListener("hashchange", () => handleHashNavigate());
         }
         // eslint-disable-next-line
     }, [])
