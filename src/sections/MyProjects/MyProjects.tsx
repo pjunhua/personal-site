@@ -464,7 +464,7 @@ export default function MyProjects() {
                 {(notMinimized || showMore) && (<div className='infoWindow'>
                     <h1>{projectArray[activeCardId].title}</h1>
                     <IgnoreScroll>
-                        <LinkInP textPara={projectArray[activeCardId].description} className={'projectDescription'} />
+                        <LinkInP textPara={projectArray[activeCardId].description} className={'projectDescription'} brighterLink />
                     </IgnoreScroll>
                     {(projectArray[activeCardId].video.hasAudio && notMinimized) && (<p>This video has audio: <span style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={toggleMuteVideo}>Click to toggle the audio</span></p>)}
                     {showMore && (<p style={{ textDecoration: 'underline' }} onClick={() => setShowMore(false)}>Click to close description</p>)}

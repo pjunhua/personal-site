@@ -19,10 +19,6 @@
     font-family: 'Rubik';
 }
 
-.contactTexts a {
-    color: #7dcfff;
-}
-
 @media (max-width: 767px) {
     .contactContainer {
         flex-wrap: wrap;
