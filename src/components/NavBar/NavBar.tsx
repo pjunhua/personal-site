@@ -60,7 +60,7 @@ export default function NavBar() {
     const [signInHeaderText, setSignInHeaderText] = useState<'Sign In' | 'Sign Up' | 'Forget Password' | 'Reset Password' | 'Verify Email Address' | 'Success'>('Sign In');
     const [signInDescriptionText, setSignInDescriptionText] = useState<string>('Welcome back! Sign in to get access to features such as direct chat message and future game implementations!');
 
-    const [passwordAutoComplete, setPasswordAutoComplete] = useState<'new-password' | 'current-password'>('current-password');
+    const [passwordAutoComplete, setPasswordAutoComplete] = useState<'off' | 'current-password'>('current-password');
 
     const [tSIOPreText, setTSIOPreText] = useState<string>("Don't have an account?");
     const [tSIOText, setTSIOText] = useState<string>('Sign Up');
@@ -69,8 +69,27 @@ export default function NavBar() {
 
     const { loggedIn, tokenUpdates, signOut } = useLogIn();
 
+    const [revealPasswords, setRevealPasswords] = useState<boolean>(false);
+    const [loadingState, setLoadingState] = useState<boolean>(false);
+
+    const emailRef = useRef<TIMLHandle | null>(null);
+    const pwRef = useRef<TIMLHandle | null>(null);
+    const confirmPwRef = useRef<TIMLHandle | null>(null);
+    const verifyEmailRef = useRef<TIMLHandle | null>(null);
+
+    const emailKey = useRef<string>('');
+    const passwordKey = useRef<string>('');
+
+    const clearAllErrors = () => {
+        if (emailRef.current) emailRef.current.setError('');
+        if (pwRef.current) pwRef.current.setError('');
+        if (confirmPwRef.current) confirmPwRef.current.setError('');
+        if (verifyEmailRef.current) verifyEmailRef.current.setError('');
+    }
+
     // Change Sign In Form's text based on form state
     useEffect(() => {
+        clearAllErrors();
         switch (signInFormState) {
             case 'SignIn':
                 setSignInHeaderText('Sign In');
@@ -83,7 +102,7 @@ export default function NavBar() {
             case 'SignUp':
                 setSignInHeaderText('Sign Up');
                 setSignInDescriptionText('New here? Welcome! Sign up to get access to features such as direct chat message and future game implementations!');
-                setPasswordAutoComplete('new-password');
+                setPasswordAutoComplete('off');
                 setSignInPillText('Sign Up');
                 setTSIOPreText('Already have an account?');
                 setTSIOText('Sign In');
@@ -122,7 +141,10 @@ export default function NavBar() {
                 setSignInDescriptionText('Welcome! Your account has been successfully created! You have been automatically logged in and may close this window now.');
                 break;
         }
-    }, [signInFormState])
+
+        // Stop loading when form state changes, be it a successful interaction or user clicked to view something else
+        setLoadingState(false);
+    }, [signInFormState]);
 
     // Handles event based on form state when form is submitted
     const toggleSignInOut = () => {
@@ -151,13 +173,6 @@ export default function NavBar() {
         }
     }
 
-    const handleSignInPopupClick = (e: any) => {
-        // Trigger closing animation when clicking outside of the menu
-        if (e.target.classList.contains('signInPopup')) {
-            closeSignInPopup();
-        }
-    }
-
     const handleSignInButtonClick = () => {
         const sIPR = signInPopupRef.current;
         if (!sIPR) throw new Error('Sign In Popup Ref not detected on sign in button click');
@@ -179,17 +194,17 @@ export default function NavBar() {
         pauseScroll.current = false;
     }
 
-    const emailRef = useRef<TIMLHandle | null>(null);
-    const pwRef = useRef<TIMLHandle | null>(null);
-    const confirmPwRef = useRef<TIMLHandle | null>(null);
-    const verifyEmailRef = useRef<TIMLHandle | null>(null);
-
-    const emailKey = useRef<string>('');
-    const passwordKey = useRef<string>('');
-
+    // THE MAIN HANDLER FOR CLICKING THE BUTTON IN THE FORM
     const signInProcess = (e: React.FormEvent<HTMLFormElement>) => {
         // Prevents default behaviour like page reloading when form is submitted, retaining any input values to be handled
         e.preventDefault();
+        clearAllErrors();
+
+        /* When user clicks the button to submit the form, start loading as the fetches may take a while. Giving feedback will prevent
+           users from thinking it might be an error and try to click again or click off. Once loading starts, there's only two places
+           that'll stop the loading. When there's an error message to handle, or the form state changes due to success or user clicking
+           off to view another part of the form. */
+        setLoadingState(true);
 
         // Find out the current intent of the form, be it to sign in/sign up/verify email with code/reset password
         const currentState = signInFormState;
@@ -274,6 +289,7 @@ export default function NavBar() {
             } else {
                 throw new Error('handleErrorDisplay triggered when ValidateResult passed.');
             }
+
         }
 
         // Sends different fetch requests based on the form state
@@ -449,7 +465,6 @@ export default function NavBar() {
             }
         }
 
-
     }
 
     /* == Error Related Declarations == */
@@ -501,7 +516,7 @@ export default function NavBar() {
         }
     }
 
-    const confirmPasswordValidation = () => {
+    const confirmPasswordValidation = (trimmedCheck?: boolean) => {
         const pRef = pwRef.current;
         if (!pRef) throw new Error('pwRef not detected at front end validation');
         const cRef = confirmPwRef.current;
@@ -511,7 +526,7 @@ export default function NavBar() {
         const confirmPassword = cRef.getInput();
 
         if (confirmPassword.trim() === '') {
-            cRef.setError("This field can't be left blank or consist of only spaces");
+            if (!trimmedCheck) cRef.setError("This field can't be left blank or consist of only spaces");
             return false;
         }
 
@@ -587,7 +602,7 @@ export default function NavBar() {
                 passwordValidation();
                 // Check if newly entered password matches any existing value in confirm password when signing up
                 if (signInFormState === 'SignUp') {
-                    confirmPasswordValidation();
+                    confirmPasswordValidation(true);
                 }
                 break;
             case 'confirmPassword':
@@ -600,26 +615,37 @@ export default function NavBar() {
 
     }
 
+    /* One of the ways loading should be stopped is when an error is received. There are multiple inputs though with multiple possible errors, as well as
+       multiple points of validation. Rather than adding this setLoadingState(false) to every validation, and risk missing out on one, I instead have it
+       react to when the input sends a signal saying it received an error. Just one error will cause the loading to stop with just this one funciton. */
+    const handleErrorReceived = (error: string) => {
+        if (error.trim() !== '') {
+            setLoadingState(false);
+        }
+    }
+
     return (
         <>
-            <div className='signInPopup signInPopupInactive' ref={signInPopupRef} onClick={handleSignInPopupClick}>
+            <div className='signInPopup signInPopupInactive' ref={signInPopupRef}>
                 <div className='signInMenu'>
                     <div className='closeButton' onClick={closeSignInPopup}>
                         <div className='xIcon'></div>
                     </div>
                     <h1 className='signInHeaderText'>{signInHeaderText}</h1>
                     <p className='signInDescriptionText'>{signInDescriptionText}</p>
-                    <form onSubmit={signInProcess}>
-                        {['SignIn', 'SignUp', 'ForgetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={emailRef} type='email' id='email' autoComplete='email' labelText='Email Address' validateInput={(id) => handleValidation(id)} />)}
-                        {['SignIn', 'SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={pwRef} type='password' id='password' autoComplete={passwordAutoComplete} labelText='Password' validateInput={(id) => handleValidation(id)} />)}
-                        {['SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={confirmPwRef} type='password' id='confirmPassword' autoComplete='off' labelText='Confirm Password' validateInput={(id) => handleValidation(id)} />)}
-                        {['VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={verifyEmailRef} type='text' id='verifyEmail' autoComplete='off' labelText='Verification Code' validateInput={(id) => handleValidation(id)} />)}
+                    <form onSubmit={loadingState ? (e: React.FormEvent<HTMLFormElement>)=>{e.preventDefault()} : signInProcess}>
+                        {['SignIn', 'SignUp', 'ForgetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={emailRef} type='email' id='email' autoComplete='email' labelText='Email Address' validateInput={(id) => handleValidation(id)} errorReceived={(error) => handleErrorReceived(error)} />)}
+                        {['SignIn', 'SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={pwRef} type={revealPasswords ? 'text' : 'password'} id='password' autoComplete={passwordAutoComplete} labelText='Password' validateInput={(id) => handleValidation(id)} errorReceived={(error) => handleErrorReceived(error)} />)}
+                        {['SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={confirmPwRef} type={revealPasswords ? 'text' : 'password'} id='confirmPassword' autoComplete='off' labelText='Confirm Password' validateInput={(id) => handleValidation(id)} errorReceived={(error) => handleErrorReceived(error)} />)}
+                        {['VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={verifyEmailRef} type='text' id='verifyEmail' autoComplete='off' labelText='Verification Code' validateInput={(id) => handleValidation(id)} errorReceived={(error) => handleErrorReceived(error)} />)}
                         {['VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<p className={`clickableLink resendVerificationCodeText ${resendTimerText !== 0 ? 'disableResend' : ''}`} onClick={getNewVerificationCode}>Resend verification code {(resendTimerText !== 0 && (<span className='resendTimer'>in {resendTimerText}</span>))}</p>)}
-                        {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<button className='signInPill' type='submit'>{signInPillText}</button>)}
+                        {['SignIn', 'SignUp', 'ResetPassword'].includes(signInFormState) && (<div className='peekPasswordContainer'><input type='checkbox' id='peekCheckbox' checked={revealPasswords} onChange={(e) => setRevealPasswords(e.target.checked)}></input><label htmlFor='peekCheckbox'>{revealPasswords ? 'Hide Passwords' : 'View Passwords'}</label></div>)}
+                        {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<button className='signInPill' type='submit'>{loadingState ? (<>Loading...<span className='loadingSpinner'></span></>) : signInPillText}</button>)}
                     </form>
                     {['SignIn'].includes(signInFormState) && (<p className='clickableLink forgetPasswordText' onClick={toggleSignInForgetPassword}>Forgot your password?</p>)}
                     {['SignIn', 'SignUp', 'ForgetPassword', 'VerifyEmail', 'ResetPassword'].includes(signInFormState) && (<p className='toggleSignInOut'>{tSIOPreText} <span className='clickableLink' onClick={toggleSignInOut} style={{ whiteSpace: 'nowrap' }}>{tSIOText}</span></p>)}
                 </div>
+                <div className='signInBackground' onClick={closeSignInPopup}></div>
             </div>
             <nav className='navbar'>
                 <div className='leftNav'>

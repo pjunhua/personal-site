@@ -12,7 +12,9 @@
 }
 
 @keyframes navbarFadeIn {
-    0%, 50% {
+
+    0%,
+    50% {
         opacity: 0;
     }
 
@@ -181,7 +183,7 @@
 @media (max-width: 374px) {
     .leftNav img {
         max-height: 70px;
-    width: 100%;
+        width: 100%;
     }
 }
 
@@ -256,6 +258,23 @@
     opacity: 0;
 }
 
+.signInBackground {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
+}
+
+.peekPasswordContainer {
+    display: flex;
+    align-items: center;
+}
+
+.peekPasswordContainer>label {
+    margin-left: 3px;
+    font-family: 'Rubik';
+}
+
 .signInPill {
     cursor: pointer;
     border-radius: 1000px;
@@ -263,6 +282,52 @@
     border: solid 1px;
     padding: 0px 20px;
     margin: 20px 0 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loadingSpinner {
+    display: block;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    border: 2px solid;
+    border-color: black transparent;
+    transform: rotate(45deg);
+    animation: loading 3s infinite;
+    margin: 5px;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(45deg);
+        animation-timing-function: linear;
+    }
+
+    32% {
+        transform: rotate(765deg);
+        animation-timing-function: ease-out;
+    }
+
+    46% {
+        transform: rotate(820deg);
+        animation-timing-function: linear;
+    }
+
+    82% {
+        transform: rotate(-45deg);
+        animation-timing-function: ease-out;
+    }
+
+    96% {
+        transform: rotate(-100deg);
+        animation-timing-function: linear;
+    }
+
+    100% {
+        transform: rotate(45deg);
+    }
 }
 
 .closeButton {
