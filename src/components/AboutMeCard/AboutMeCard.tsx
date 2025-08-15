@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import './AboutMeCard.css';
 import IgnoreScroll from '../IgnoreScroll/IgnoreScroll';
+import LinkInP from '../LinkInP/LinkInP';
 
 interface AboutMeCardProps {
     title: string;
@@ -37,7 +38,7 @@ export default function AboutMeCard({ title, nextTitle, bodyText, zIndexObject, 
             <div className={`card ${startAni ? 'transitioning' : ''}`} onClick={transitionNext} style={{ zIndex: zIndexObject.zIndex }}>
                 <h1 className='cardTitle'>{title}</h1>
                 <IgnoreScroll>
-                    <p className='cardBody'>{bodyText}</p>
+                    <LinkInP className='cardBody' textPara={bodyText} />
                 </IgnoreScroll>
                 <p className='nextTitle'>Click to view the next section:<br /><span style={{ whiteSpace: 'nowrap' }}>{nextTitle} →</span></p>
             </div>
