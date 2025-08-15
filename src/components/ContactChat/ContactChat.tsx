@@ -15,6 +15,8 @@ export default function ContactChat() {
 
     const { loggedIn, accessToken, accountEmail, tokenUpdates } = useLogIn();
 
+    const [loadingState, setLoadingState] = useState<boolean>(false);
+
     const wsRef = useRef<WebSocket | null>(null);
 
     type listType = {
@@ -52,6 +54,15 @@ export default function ContactChat() {
            back to list again. */
         if (accountEmail.current === process.env.REACT_APP_DEFAULT_CHAT_EMAIL) {
             setDisplayToggle('list');
+        } else {
+            setDisplayToggle('solo');
+        }
+
+        // Reset text area when logging in/out
+        const mTAF = messageTextAreaRef.current;
+        if (mTAF) {
+            mTAF.value = '';
+            mTAF.rows = 1;
         }
     }, [loggedIn])
 
@@ -112,6 +123,7 @@ export default function ContactChat() {
                         case 'message':
                             if (!messageTextAreaRef.current) throw new Error('Message input ref not detected on message');
                             newMessage(message);
+                            setLoadingState(false);
                             break;
                         case 'loadPreviousMessages':
                             for (const msg of messages) {
@@ -119,6 +131,10 @@ export default function ContactChat() {
                             }
                             break;
                     }
+                }
+
+                ws.onerror = () => {
+                    setLoadingState(false);
                 }
 
             }
@@ -178,11 +194,13 @@ export default function ContactChat() {
     const sendMessage = () => {
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             const mTAF = messageTextAreaRef.current;
-            if (!mTAF) throw new Error('Message Box not detected on send');
+            if (!mTAF) throw new Error('Message Text Area not detected on send');
             const input: string = mTAF.value;
             if (input.trim() !== '' && input) {
                 wsRef.current.send(input);
                 mTAF.value = '';
+                handleTextAreaChange();
+                setLoadingState(true);
             }
         }
     }
@@ -196,13 +214,23 @@ export default function ContactChat() {
     const [, reRender] = useState<number>(0);
 
     // Initial setup to get the height of one row of mTAR for calculation later
-    const setupMessageTextArea = useCallback((node: HTMLTextAreaElement | null) => {
-        messageTextAreaRef.current = node;
-        const mTAR = messageTextAreaRef.current;
-        if (mTAR !== null) {
-            baseScrollHeight.current = mTAR.scrollHeight;
+    const setupMessageTextArea = (node: HTMLTextAreaElement | null) => {
+        /* Whenever the textarea changes, the re-render causes this callback ref to trigger for every input. This 'if' makes it so it only happens once when setting up, as intended. 
+           Otherwise, the baseScrollHeight will keep changing to match the current scrollHeight when it's meant to be used as a baseline comparison. 
+           
+           The !== node condition makes it so when we're transitioning from list to solo for displayToggle, it'll update it to the latest one. Because in displayToggle list, the 
+           text area doesn't exist and thus will have a scrollHeight of 0. When we switch to solo, it'll remain at 0 which messes up calculation for handleTextAreaChange(). 
+           With this, it'll recognize that the text area, now that displayToggle is solo, no longer has a scrollHeight of 0 and updates it to the correct node. */
+        if ((messageTextAreaRef.current === null || messageTextAreaRef.current !== node) && node !== null) {
+            messageTextAreaRef.current = node;
+            const mTAR = messageTextAreaRef.current;
+
+            // Define the base scroll height, such that as the y overflow increases due to text length, we know how many rows of text there are
+            if (mTAR !== null) {
+                baseScrollHeight.current = mTAR.scrollHeight;
+            }
         }
-    }, []);
+    };
 
     // Initial setup to make messages start from the bottom
     const setupMessageBox = useCallback((node: HTMLDivElement | null) => {
@@ -222,6 +250,15 @@ export default function ContactChat() {
         mTAR.rows = Math.min(Math.ceil(mTAR.scrollHeight / baseScrollHeight.current), 4);
         setCurrentRows(mTAR.rows);
         reRender(n => n + 1);
+    }
+
+    // Makes it so the enter key sends the message, and you need to shift+enter to break new line
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        // When e.code is a blank string it means the user is on mobile. On mobile we don't want the enter key to send, but to act as normal and break line instead.
+        if (e.key === 'Enter' && e.shiftKey === false && e.code !== '') {
+            e.preventDefault();
+            sendMessage();
+        }
     }
 
     return (
@@ -318,10 +355,10 @@ export default function ContactChat() {
                 <div className='chatFooter'>
                     <div className='messageTextBox' style={{ height: `${50 + ((currentRows - 1) * baseScrollHeight.current)}px` }}>
                         <IgnoreScroll>
-                            <textarea ref={setupMessageTextArea} className='messageTextArea' disabled={!loggedIn} placeholder='Enter your message here' rows={1} onChange={handleTextAreaChange}></textarea>
+                            <textarea ref={setupMessageTextArea} onKeyDown={(e) => handleKeyDown(e)} className='messageTextArea' placeholder='Enter your message here' rows={1} onChange={handleTextAreaChange} disabled={!loggedIn}></textarea>
                         </IgnoreScroll>
                     </div>
-                    <button className='messageSendBtn' onClick={sendMessage}><div className="arrow right"></div></button>
+                    <button className='messageSendBtn' onClick={loadingState ? ()=>{} : sendMessage}>{loadingState ? <span className='loadingSpinner'></span> : <span className="arrow right"></span>}</button>
                 </div>
             </>)}
         </div>
