@@ -8,6 +8,7 @@ interface timlProps {
     labelText: string
     validateInput?: (id: string) => void
     liveUpdate?: (input: string) => void
+    errorReceived?: (error: string) => void
 }
 
 export interface TIMLHandle {
@@ -17,7 +18,7 @@ export interface TIMLHandle {
 }
 
 // forwardRef allows the use of useImperativeHandle
-const TextInputMovingLabel = forwardRef<TIMLHandle, timlProps>(({ type, id, autoComplete, labelText, validateInput, liveUpdate }, ref) => {
+const TextInputMovingLabel = forwardRef<TIMLHandle, timlProps>(({ type, id, autoComplete, labelText, validateInput, liveUpdate, errorReceived }, ref) => {
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [errorText, setErrorText] = useState<string>('');
@@ -37,6 +38,11 @@ const TextInputMovingLabel = forwardRef<TIMLHandle, timlProps>(({ type, id, auto
 
     const setError = (errorMsg: string) => {
         setErrorText(errorMsg);
+
+        // Ping the parent that it received a new request to set an error that isn't blank, mainly used for handling failed validations
+        if (errorMsg.trim() !== '' && errorReceived) {
+            errorReceived(errorMsg);
+        }
     }
 
     // Allows parent component to access these, usually only the child can invoke a parent's function
@@ -74,7 +80,7 @@ const TextInputMovingLabel = forwardRef<TIMLHandle, timlProps>(({ type, id, auto
             <div className='timlDiv'>
                 <input ref={inputRef} className='timlInput' type={type} id={id} autoComplete={autoComplete} placeholder='  ' spellCheck='false' autoCapitalize='false' autoCorrect='false' onFocus={handleInputFocus} onBlur={handleInputBlur} onChange={handleInputChange}></input>
                 <label className='timlLabel' htmlFor={id}>{labelText}</label>
-                <div className='inputClearButton' onMouseDown={(e)=>e.preventDefault()} onClick={()=>{setInput(''); setErrorText('');}}></div>
+                <div className='inputClearButton' onMouseDown={(e) => e.preventDefault()} onClick={() => { setInput(''); setErrorText(''); }}></div>
             </div>
             {errorText !== '' && (<p className='timlError'>{errorText}</p>)}
         </div>
