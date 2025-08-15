@@ -49,7 +49,7 @@ export default function WebsiteInfo() {
     return (
         <div className='websiteInfoContainer'>
             <h1 className='infoExplanationText'>Learn more about this website!</h1>
-            <p className='infoExplanationText'>Below are all the features you can find on this website! Slowly browse through them or enter keywords in the search bar to find what you're interested in.</p>
+            <LinkInP className='infoExplanationText' textPara={"Below are all the features you can find on this website! Slowly browse through them or enter keywords in the search bar to find what you're interested in. You may also view this website's GitHub ||here^^https://github.com/pjunhua/personal-site||."} brighterLink />
             <div className='searchBar'>
                 <TextInputMovingLabel ref={inputRef} type='text' id='tagSearch' autoComplete='none' labelText='Enter your keyword here' liveUpdate={(input) => handleInputChange(input)} />
             </div>
