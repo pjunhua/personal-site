@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import TextInputMovingLabel, { TIMLHandle } from '../TextInputMovingLabel/TextInputMovingLabel';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { useLogIn } from '../../context/LogInContext';
 import { useNav } from '../../context/NavigationContext';
 import './NavBar.css';
@@ -624,6 +625,33 @@ export default function NavBar() {
         }
     }
 
+    const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+        const res = await fetch(`${process.env.REACT_APP_BASE_URL}/googleAuth`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ credentials: credentialResponse.credential })
+        });
+
+        if (!res.ok) {
+            console.error('Fetch failed:', res.status, res.statusText);
+            return;
+        }
+
+        const result = await res.json();
+
+        // validatePass has been repurposed to determine if user already had an account or not, true means they had one, false means they just created one
+        if (result.validatePass) {
+            setSignInFormState('SuccessSignIn');
+        } else {
+            setSignInFormState('SuccessSignUp');
+        }
+
+        updateLogIn({ aT: result.value.accessToken, e: result.value.email, sLI: true });
+    }
+
     return (
         <>
             <div className='signInPopup signInPopupInactive' ref={signInPopupRef}>
@@ -633,7 +661,17 @@ export default function NavBar() {
                     </div>
                     <h1 className='signInHeaderText'>{signInHeaderText}</h1>
                     <p className='signInDescriptionText'>{signInDescriptionText}</p>
-                    <form onSubmit={loadingState ? (e: React.FormEvent<HTMLFormElement>)=>{e.preventDefault()} : signInProcess}>
+                    <form onSubmit={loadingState ? (e: React.FormEvent<HTMLFormElement>) => { e.preventDefault() } : signInProcess}>
+                        {['SignIn', 'SignUp'].includes(signInFormState) && (
+                            <GoogleLogin
+                                onSuccess={credentialResponse => handleGoogleSuccess(credentialResponse)}
+                                onError={() => {
+                                    console.log('Login Failed');
+                                }}
+                                text='continue_with'
+                                shape='pill'
+                            />
+                        )}
                         {['SignIn', 'SignUp', 'ForgetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={emailRef} type='email' id='email' autoComplete='email' labelText='Email Address' validateInput={(id) => handleValidation(id)} errorReceived={(error) => handleErrorReceived(error)} />)}
                         {['SignIn', 'SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={pwRef} type={revealPasswords ? 'text' : 'password'} id='password' autoComplete={passwordAutoComplete} labelText='Password' validateInput={(id) => handleValidation(id)} errorReceived={(error) => handleErrorReceived(error)} />)}
                         {['SignUp', 'ResetPassword'].includes(signInFormState) && (<TextInputMovingLabel ref={confirmPwRef} type={revealPasswords ? 'text' : 'password'} id='confirmPassword' autoComplete='off' labelText='Confirm Password' validateInput={(id) => handleValidation(id)} errorReceived={(error) => handleErrorReceived(error)} />)}
