@@ -23,7 +23,7 @@ export default function ContactChat() {
         otherUser: string,
         sentBy: string,
         messageContent: string,
-        profileImageUrl: string,
+        profilePictureUrl: string,
         createdAt: string
     }
 
@@ -31,7 +31,7 @@ export default function ContactChat() {
         sender: string,
         message: string,
         direction: 'incoming' | 'outgoing',
-        profileImageUrl?: string,
+        profilePictureUrl?: string,
         createdAt: string
     }
 
@@ -41,7 +41,7 @@ export default function ContactChat() {
         recipent: string,
         message_content: string,
         created_at: string,
-        profile_image_url?: string
+        profile_picture_url?: string
     }
 
     const [listToDisplay, setListToDisplay] = useState<listType[]>([]);
@@ -75,7 +75,7 @@ export default function ContactChat() {
             sender: 'Jun Hua',
             message: "Hey there! 👋 How may I help you?\n\nPlease note that you need to have an account on this website, and be logged in, if you want to send a message here!",
             direction: 'incoming',
-            profileImageUrl: `${process.env.REACT_APP_BASE_CDN_URL}/img/transparent_profile.png`,
+            profilePictureUrl: `${process.env.REACT_APP_BASE_CDN_URL}/img/transparent_profile.png`,
             createdAt: ''
         }]);
 
@@ -91,10 +91,8 @@ export default function ContactChat() {
 
         if (displayToggle === 'solo') {
 
+            let timeout = false;
             const setupWebSocket = async () => {
-
-                // Chat messaging is intended for signed in users only, this checks if we're logged in while updating our accessToken
-                await tokenUpdates();
                 const ws = new WebSocket(`${process.env.REACT_APP_WEBSOCKET_URL}/connectChat?accessToken=${accessToken.current}&email=${emailToView.current}`);
 
                 ws.onopen = () => {
@@ -106,13 +104,13 @@ export default function ContactChat() {
 
                     const newMessage = (message: sqlMessage) => {
                         setMessagesToDisplay(current => {
-                            const { sent_by, message_content, profile_image_url, created_at } = message;
+                            const { sent_by, message_content, profile_picture_url, created_at } = message;
                             const array = [...current];
                             array.push({
                                 sender: sent_by === process.env.REACT_APP_DEFAULT_CHAT_EMAIL ? 'Jun Hua' : sent_by,
                                 message: message_content,
                                 direction: sent_by === email ? 'outgoing' : 'incoming',
-                                profileImageUrl: sent_by === process.env.REACT_APP_DEFAULT_CHAT_EMAIL ? `${process.env.REACT_APP_BASE_CDN_URL}/img/transparent_profile.png` : profile_image_url,
+                                profilePictureUrl: sent_by === process.env.REACT_APP_DEFAULT_CHAT_EMAIL ? `${process.env.REACT_APP_BASE_CDN_URL}/img/transparent_profile.png` : profile_picture_url,
                                 createdAt: created_at
                             });
                             return array;
@@ -134,9 +132,15 @@ export default function ContactChat() {
                 }
 
                 ws.onerror = () => {
+                    // If there's an error like accessToken expired, try one more time after updating tokens
+                    const retryWs = async () => {
+                        await tokenUpdates();
+                        timeout = true;
+                        setupWebSocket();
+                    }
+                    if (!timeout) retryWs();
                     setLoadingState(false);
                 }
-
             }
 
             // Timeout so it can be cancelled if this useEffect is called multiple times back to back in a short timeframe
@@ -152,8 +156,8 @@ export default function ContactChat() {
                 }
             }
         } else {
+            let timeout = false;
             const fetchList = async () => {
-                await tokenUpdates();
                 const res = await fetch(`${process.env.REACT_APP_BASE_URL}/fetchMessageList`, {
                     method: 'POST',
                     headers: {
@@ -165,11 +169,17 @@ export default function ContactChat() {
 
                 if (!res.ok) {
                     console.error('Fetch failed:', res.status, res.statusText, await res.text());
-                    return;
-                }
 
-                const result = await res.json();
-                setListToDisplay(result);
+                    // If failed, try one more time after refreshing accessToken, setting timeout to true avoids an infinite fail loop
+                    if (!timeout) {
+                        await tokenUpdates();
+                        timeout = true;
+                        fetchList();
+                    }
+                } else {
+                    const result = await res.json();
+                    setListToDisplay(result);
+                }
             }
 
             // Timeout so it can be cancelled if this useEffect is called multiple times back to back in a short timeframe
@@ -288,10 +298,13 @@ export default function ContactChat() {
                         return <>
                             {index > 0 && (<div className='messageListItemDivider'></div>)}
                             <div className='messageListItem' onClick={() => openSoloChat(message.otherUser)}>
-                                <div className='profileImage' style={{ backgroundImage: `url(${message.profileImageUrl ?? `${process.env.REACT_APP_BASE_CDN_URL}/img/default_profile.png`})` }}></div>
+                                <div className='profileImage' style={{ backgroundImage: `url(${message.profilePictureUrl ?? `${process.env.REACT_APP_BASE_CDN_URL}/img/default_profile.png)`}`}}></div>
                                 <div className='messageListItemTexts'>
                                     <h2 className='mLITUser'>{message.otherUser}</h2>
-                                    <p className='mLITMessage'>{message.messageContent}</p>
+                                    <div className='mLITMessage'>
+                                        <p className='mLITMessageSender'>{message.sentBy}</p>
+                                        <p className='mLITMessageContent'>: {message.messageContent}</p>
+                                    </div>
                                 </div>
                                 {!skipTime && (<p className='mLITTime'>{timestampToDisplay}</p>)}
                             </div>
@@ -338,7 +351,7 @@ export default function ContactChat() {
                                         <div className='dateLine'></div>
                                     </div>)}
                                     <div className={`messageObject ${ownMessage ? 'right' : 'left'}`}>
-                                        {!ownMessage && (<div className='profileImage' style={{ backgroundImage: `url(${message.profileImageUrl ?? `${process.env.REACT_APP_BASE_CDN_URL}/img/default_profile.png`})` }}></div>)}
+                                        {!ownMessage && (<div className='profileImage' style={{ backgroundImage: `url(${message.profilePictureUrl ?? `${process.env.REACT_APP_BASE_CDN_URL}/img/default_profile.png`})` }}></div>)}
                                         <div className='message'>
                                             <p className='messageText'>
                                                 {!ownMessage && (<span style={{ fontWeight: 'bold' }}>{message.sender}<br /><br /></span>)}
@@ -358,7 +371,7 @@ export default function ContactChat() {
                             <textarea ref={setupMessageTextArea} onKeyDown={(e) => handleKeyDown(e)} className='messageTextArea' placeholder='Enter your message here' rows={1} onChange={handleTextAreaChange} disabled={!loggedIn}></textarea>
                         </IgnoreScroll>
                     </div>
-                    <button className='messageSendBtn' onClick={loadingState ? ()=>{} : sendMessage}>{loadingState ? <span className='loadingSpinner'></span> : <span className="arrow right"></span>}</button>
+                    <button className='messageSendBtn' onClick={loadingState ? () => { } : sendMessage}>{loadingState ? <span className='loadingSpinner'></span> : <span className="arrow right"></span>}</button>
                 </div>
             </>)}
         </div>

@@ -53,11 +53,23 @@
 }
 
 .mLITMessage {
-    margin: 0;
+    display: flex;
+}
+
+.mLITMessage > p {
     font-family: 'Rubik';
-    text-overflow: ellipsis;
+    margin: 0;
     overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.mLITMessageSender {
+    max-width: 60%;
+}
+
+.mLITMessageContent {
+    max-width: 40%;
 }
 
 .mLITTime {
@@ -114,6 +126,7 @@
     display: flex;
     flex-wrap: wrap;
     column-gap: 10px;
+    margin-left: 10px;
 }
 
 .messageText {
