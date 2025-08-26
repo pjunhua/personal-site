@@ -67,7 +67,7 @@ export default function NavBar() {
 
     const [signInPillText, setSignInPillText] = useState<'Sign In' | 'Sign Up' | 'Reset Password' | 'Confirm Verification Code'>('Sign In');
 
-    const { loggedIn, tokenUpdates, signOut } = useLogIn();
+    const { loggedIn, updateLogIn, signOut } = useLogIn();
 
     const [revealPasswords, setRevealPasswords] = useState<boolean>(false);
     const [loadingState, setLoadingState] = useState<boolean>(false);
@@ -317,7 +317,7 @@ export default function NavBar() {
                     if (!result.validatePass) {
                         handleErrorDisplay(result);
                     } else {
-                        await tokenUpdates();
+                        updateLogIn({ aT: result.value.accessToken, e: result.value.email, sLI: true });
                         setSignInFormState('SuccessSignUp');
                     }
                 }
@@ -385,7 +385,7 @@ export default function NavBar() {
                     if (!result.validatePass) {
                         handleErrorDisplay(result);
                     } else {
-                        await tokenUpdates();
+                        updateLogIn({ aT: result.value.accessToken, e: result.value.email, sLI: true });
                         setSignInFormState('SuccessResetPassword');
                     }
                 }
@@ -417,7 +417,7 @@ export default function NavBar() {
                         if (!result.validatePass) {
                             handleErrorDisplay(result);
                         } else {
-                            await tokenUpdates();
+                            updateLogIn({ aT: result.value.accessToken, e: result.value.email, sLI: true });
                             setSignInFormState('SuccessSignIn');
                         }
                     } catch (error) {

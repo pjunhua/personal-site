@@ -1,10 +1,17 @@
 import React, { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 
+type uLIProps = {
+    aT?: string | null,
+    e?: string | null,
+    sLI?: boolean | null
+}
+
 interface UserContextType {
     accessToken: React.RefObject<string>;
     accountEmail: React.RefObject<string>;
     loggedIn: boolean;
     setLoggedIn: (loggedIn: boolean) => void;
+    updateLogIn: (props: uLIProps) => void;
     tokenUpdates: () => void;
     signOut: () => void;
 }
@@ -26,6 +33,18 @@ export const LogInProvider: React.FC<LogInProviderProps> = ({ children }) => {
     const accessToken = useRef<string>('');
     const accountEmail = useRef<string>('');
 
+    const updateLogIn = ({ aT = null, e = null, sLI = null }: uLIProps) => {
+        if (sLI === false) {
+            accessToken.current = '';
+            accountEmail.current = '';
+            setLoggedIn(false);
+        } else {
+            if (aT !== null) accessToken.current = aT;
+            if (e !== null) accountEmail.current = e;
+            if (sLI !== null && sLI === true) setLoggedIn(true);
+        }
+    }
+
     // Invoked when updating an expired/missing Access Token, or to check if logged in, Refresh Token must exist and be valid
     const tokenUpdates = async () => {
         const res = await fetch(`${process.env.REACT_APP_BASE_URL}/tokenUpdates`, {
@@ -46,17 +65,14 @@ export const LogInProvider: React.FC<LogInProviderProps> = ({ children }) => {
 
         if (!result.validatePass) {
             // Means no valid Refresh Token, which can only be created by logging in, set access token to blank to indicate logged out
-            accessToken.current = '';
-            accountEmail.current = '';
-            setLoggedIn(false);
+            updateLogIn({ sLI: false });
         } else {
             // Means valid Refresh Token with valid Access Token
-            accessToken.current = result.value.accessToken;
-            accountEmail.current = result.value.email;
-            setLoggedIn(true);
+            updateLogIn({ aT: result.value.accessToken, e: result.value.email, sLI: true });
         }
     }
 
+    // Sends a fetch to remove the refreshToken
     const signOut = async () => {
         const res = await fetch(`${process.env.REACT_APP_BASE_URL}/signOut`, {
             method: 'POST',
@@ -70,9 +86,7 @@ export const LogInProvider: React.FC<LogInProviderProps> = ({ children }) => {
             console.error('Fetch failed:', res.status, res.statusText);
             return;
         } else {
-            accessToken.current = '';
-            accountEmail.current = ''
-            setLoggedIn(false);
+            updateLogIn({ sLI: false });
         }
     }
 
@@ -87,7 +101,7 @@ export const LogInProvider: React.FC<LogInProviderProps> = ({ children }) => {
         // eslint-disable-next-line
     }, []);
 
-    const value = { accessToken, accountEmail, loggedIn, setLoggedIn, tokenUpdates, signOut };
+    const value = { accessToken, accountEmail, loggedIn, setLoggedIn, updateLogIn, tokenUpdates, signOut };
 
     return (
         /* .Provider 'subscribes' LogInContext to components using LogInProvider, passing the context to LogInContext, making it no
